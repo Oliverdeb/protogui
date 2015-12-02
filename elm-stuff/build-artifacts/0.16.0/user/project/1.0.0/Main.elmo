@@ -1,0 +1,56 @@
+Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values) return _elm.Main.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
+   var _op = {};
+   var countStyle = $Html$Attributes.style(_U.list([]));
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      if (_p0.ctor === "AddChild") {
+            return A2($Html.div,
+            _U.list([]),
+            _U.list([A2($Html.button,
+            _U.list([]),
+            _U.list([$Html.text("Add Child")]))]));
+         } else {
+            return A2($Html.div,_U.list([]),_U.list([]));
+         }
+   });
+   var RemoveChild = {ctor: "RemoveChild"};
+   var AddChild = {ctor: "AddChild"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,AddChild)]),
+              _U.list([$Html.text("Add Child")]))
+              ,model
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,RemoveChild)]),
+              _U.list([$Html.text("Remove child")]))]));
+   });
+   var main = $StartApp$Simple.start({model: A2($Html.div,
+                                     _U.list([]),
+                                     _U.list([]))
+                                     ,view: view
+                                     ,update: update});
+   return _elm.Main.values = {_op: _op
+                             ,AddChild: AddChild
+                             ,RemoveChild: RemoveChild
+                             ,update: update
+                             ,view: view
+                             ,countStyle: countStyle
+                             ,main: main};
+};
