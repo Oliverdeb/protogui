@@ -8,32 +8,66 @@ import Signal exposing(Address)
 
 -- MODEL
 
-type alias Model =  Html
+type Tree =
+    Empty
+    | Node Int Tree
+
+type alias Model =  Tree
 
 -- UPDATE
 
-type Action = AddChild | RemoveChild
+type Action = AddChild | RemoveChild Int
 
 update : Action -> Model -> Model
-update action model =
+update action model=
   case action of
     AddChild ->
-      div[][button[{- onClick address AddChild -}] [ text "Add Child"]]
+      addChild model
 
-    RemoveChild ->
-      div[][]
+    RemoveChild index ->
+      removeChild model index
+
+
+addChild : Model -> Model
+addChild model =
+    case model of
+        Empty -> 
+            Node 1 Empty
+        Node depth child -> 
+            Node (depth+1) <| addChild child
+
+
+removeChild : Model -> Int ->Model
+removeChild model index =
+    case model of
+        Empty -> 
+            Empty
+        Node depth child ->
+            if index == depth then
+                child
+            else 
+                Node depth <| removeChild child index
 
 
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  div []
-    [ button [ onClick address AddChild ] [ text "Add Child" ]
-    , model {-div [ countStyle ] [ model ]-}
-    , button [ onClick address RemoveChild ] [ text "Remove child" ]
-    ]
-
+    case model of        
+        Empty ->
+            div[]
+            [
+              button [ onClick address AddChild ] [ text "add child" ] 
+            ]
+ 
+        Node depth child -> 
+            div[]
+            [
+              --text <| toString model,
+             input [placeholder  <| "node " ++ toString depth][ text <| "node " ++ toString depth ]
+            , button [ onClick address <| RemoveChild depth ] [ text <| "remove node " ++ toString depth ]
+            , view address child 
+            ]
 
 countStyle : Attribute
 countStyle =
@@ -46,6 +80,6 @@ countStyle =
     ]
 main : Signal Html
 main = 
-    StartApp.Simple.start{model  = div[][], view = view, update = update}
+    StartApp.Simple.start{model  = Empty, view = view, update = update}
 
     
