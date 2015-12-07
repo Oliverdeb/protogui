@@ -11421,40 +11421,81 @@ Elm.Main.make = function (_elm) {
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
    var countStyle = $Html$Attributes.style(_U.list([]));
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      if (_p0.ctor === "AddChild") {
+   var RemoveChild = function (a) {
+      return {ctor: "RemoveChild",_0: a};
+   };
+   var AddChild = {ctor: "AddChild"};
+   var view = F2(function (address,model) {
+      var _p0 = model;
+      if (_p0.ctor === "Empty") {
             return A2($Html.div,
             _U.list([]),
             _U.list([A2($Html.button,
-            _U.list([]),
-            _U.list([$Html.text("Add Child")]))]));
+            _U.list([A2($Html$Events.onClick,address,AddChild)]),
+            _U.list([$Html.text("add child")]))]));
          } else {
-            return A2($Html.div,_U.list([]),_U.list([]));
+            var _p1 = _p0._0;
+            return A2($Html.div,
+            _U.list([]),
+            _U.list([A2($Html.input,
+                    _U.list([$Html$Attributes.value("")
+                            ,$Html$Attributes.placeholder(A2($Basics._op["++"],
+                            "node ",
+                            $Basics.toString(_p1)))]),
+                    _U.list([$Html.text(A2($Basics._op["++"],
+                    "node ",
+                    $Basics.toString(_p1)))]))
+                    ,A2($Html.button,
+                    _U.list([A2($Html$Events.onClick,address,RemoveChild(_p1))]),
+                    _U.list([$Html.text(A2($Basics._op["++"],
+                    "remove node ",
+                    $Basics.toString(_p1)))]))
+                    ,A2(view,address,_p0._1)]));
          }
    });
-   var RemoveChild = {ctor: "RemoveChild"};
-   var AddChild = {ctor: "AddChild"};
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,AddChild)]),
-              _U.list([$Html.text("Add Child")]))
-              ,model
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,RemoveChild)]),
-              _U.list([$Html.text("Remove child")]))]));
+   var Node = F2(function (a,b) {
+      return {ctor: "Node",_0: a,_1: b};
    });
-   var main = $StartApp$Simple.start({model: A2($Html.div,
-                                     _U.list([]),
-                                     _U.list([]))
+   var Empty = {ctor: "Empty"};
+   var addChild = function (model) {
+      var _p2 = model;
+      if (_p2.ctor === "Empty") {
+            return A2(Node,1,Empty);
+         } else {
+            return A2(Node,_p2._0 + 1,addChild(_p2._1));
+         }
+   };
+   var removeChild = F2(function (model,index) {
+      var _p3 = model;
+      if (_p3.ctor === "Empty") {
+            return Empty;
+         } else {
+            var _p5 = _p3._0;
+            var _p4 = _p3._1;
+            return _U.eq(index,_p5) ? _p4 : A2(Node,
+            _p5,
+            A2(removeChild,_p4,index));
+         }
+   });
+   var update = F2(function (action,model) {
+      var _p6 = action;
+      if (_p6.ctor === "AddChild") {
+            return addChild(model);
+         } else {
+            return A2(removeChild,model,_p6._0);
+         }
+   });
+   var main = $StartApp$Simple.start({model: Empty
                                      ,view: view
                                      ,update: update});
    return _elm.Main.values = {_op: _op
+                             ,Empty: Empty
+                             ,Node: Node
                              ,AddChild: AddChild
                              ,RemoveChild: RemoveChild
                              ,update: update
+                             ,addChild: addChild
+                             ,removeChild: removeChild
                              ,view: view
                              ,countStyle: countStyle
                              ,main: main};

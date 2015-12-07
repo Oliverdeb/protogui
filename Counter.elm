@@ -64,7 +64,7 @@ view address model =
             div[]
             [
               --text <| toString model,
-             input [placeholder  <| "node " ++ toString depth][ text <| "node " ++ toString depth ]
+             input [value "", placeholder  <| "node " ++ toString depth][ text <| "node " ++ toString depth ]
             , button [ onClick address <| RemoveChild depth ] [ text <| "remove node " ++ toString depth ]
             , view address child 
             ]
