@@ -5,93 +5,96 @@ Elm.Main.make = function (_elm) {
    if (_elm.Main.values) return _elm.Main.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
+   $Characteristics = Elm.Characteristics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $Html$Lazy = Elm.Html.Lazy.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var countStyle = $Html$Attributes.style(_U.list([]));
-   var RemoveChild = function (a) {
-      return {ctor: "RemoveChild",_0: a};
+   var emptyModel = {index: 0,servers: _U.list([])};
+   var newServer = function (n) {
+      return {model: $Characteristics.init
+             ,name: A2($Basics._op["++"],"Server ",$Basics.toString(n))
+             ,id: n};
    };
-   var AddChild = {ctor: "AddChild"};
-   var view = F2(function (address,model) {
-      var _p0 = model;
-      if (_p0.ctor === "Empty") {
-            return A2($Html.div,
-            _U.list([]),
-            _U.list([A2($Html.button,
-            _U.list([A2($Html$Events.onClick,address,AddChild)]),
-            _U.list([$Html.text("add child")]))]));
-         } else {
-            var _p1 = _p0._0;
-            return A2($Html.div,
-            _U.list([]),
-            _U.list([A2($Html.input,
-                    _U.list([$Html$Attributes.value("")
-                            ,$Html$Attributes.placeholder(A2($Basics._op["++"],
-                            "node ",
-                            $Basics.toString(_p1)))]),
-                    _U.list([$Html.text(A2($Basics._op["++"],
-                    "node ",
-                    $Basics.toString(_p1)))]))
-                    ,A2($Html.button,
-                    _U.list([A2($Html$Events.onClick,address,RemoveChild(_p1))]),
-                    _U.list([$Html.text(A2($Basics._op["++"],
-                    "remove node ",
-                    $Basics.toString(_p1)))]))
-                    ,A2(view,address,_p0._1)]));
-         }
-   });
-   var Node = F2(function (a,b) {
-      return {ctor: "Node",_0: a,_1: b};
-   });
-   var Empty = {ctor: "Empty"};
-   var addChild = function (model) {
-      var _p2 = model;
-      if (_p2.ctor === "Empty") {
-            return A2(Node,1,Empty);
-         } else {
-            return A2(Node,_p2._0 + 1,addChild(_p2._1));
-         }
-   };
-   var removeChild = F2(function (model,index) {
-      var _p3 = model;
-      if (_p3.ctor === "Empty") {
-            return Empty;
-         } else {
-            var _p5 = _p3._0;
-            var _p4 = _p3._1;
-            return _U.eq(index,_p5) ? _p4 : A2(Node,
-            _p5,
-            A2(removeChild,_p4,index));
-         }
-   });
    var update = F2(function (action,model) {
-      var _p6 = action;
-      if (_p6.ctor === "AddChild") {
-            return addChild(model);
-         } else {
-            return A2(removeChild,model,_p6._0);
-         }
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "NoOp": return model;
+         case "AddServer": return _U.update(model,
+           {index: model.index + 1
+           ,servers: A2($Basics._op["++"],
+           model.servers,
+           _U.list([newServer(model.index)]))});
+         case "RemoveServer": return _U.update(model,
+           {servers: A2($List.filter,
+           function (s) {
+              return !_U.eq(s.id,_p0._0);
+           },
+           model.servers)});
+         default: var updateServer = function (server) {
+              return _U.eq(server.id,_p0._0) ? _U.update(server,
+              {model: A2($Characteristics.update,
+              _p0._1,
+              server.model)}) : server;
+           };
+           return _U.update(model,
+           {servers: A2($List.map,updateServer,model.servers)});}
    });
-   var main = $StartApp$Simple.start({model: Empty
-                                     ,view: view
-                                     ,update: update});
+   var NoOp = {ctor: "NoOp"};
+   var actions = $Signal.mailbox(NoOp);
+   var model = A3($Signal.foldp,update,emptyModel,actions.signal);
+   var ModifyServer = F2(function (a,b) {
+      return {ctor: "ModifyServer",_0: a,_1: b};
+   });
+   var showServer = F2(function (address,server) {
+      return A2($Characteristics.view,
+      A2($Signal.forwardTo,address,ModifyServer(server.id)),
+      server.model);
+   });
+   var showServers = F2(function (address,servers) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,showServer(address),servers));
+   });
+   var AddServer = {ctor: "AddServer"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([$Html.text("hello")
+              ,A3($Html$Lazy.lazy2,showServers,address,model.servers)
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,AddServer)]),
+              _U.list([$Html.text("Add Server")]))]));
+   });
+   var main = A2($Signal.map,view(actions.address),model);
+   var RemoveServer = function (a) {
+      return {ctor: "RemoveServer",_0: a};
+   };
+   var Server = F3(function (a,b,c) {
+      return {model: a,name: b,id: c};
+   });
+   var Model = F2(function (a,b) {
+      return {index: a,servers: b};
+   });
    return _elm.Main.values = {_op: _op
-                             ,Empty: Empty
-                             ,Node: Node
-                             ,AddChild: AddChild
-                             ,RemoveChild: RemoveChild
+                             ,Model: Model
+                             ,Server: Server
+                             ,RemoveServer: RemoveServer
+                             ,AddServer: AddServer
+                             ,ModifyServer: ModifyServer
+                             ,NoOp: NoOp
+                             ,newServer: newServer
+                             ,emptyModel: emptyModel
                              ,update: update
-                             ,addChild: addChild
-                             ,removeChild: removeChild
                              ,view: view
-                             ,countStyle: countStyle
+                             ,showServers: showServers
+                             ,showServer: showServer
+                             ,model: model
+                             ,actions: actions
                              ,main: main};
 };

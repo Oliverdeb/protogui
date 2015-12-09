@@ -1,0 +1,110 @@
+Elm.Characteristic = Elm.Characteristic || {};
+Elm.Characteristic.make = function (_elm) {
+   "use strict";
+   _elm.Characteristic = _elm.Characteristic || {};
+   if (_elm.Characteristic.values)
+   return _elm.Characteristic.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Html$Lazy = Elm.Html.Lazy.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var newData = function (numOfInputs) {
+      return {value: "",id: numOfInputs};
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "NoOp": return model;
+         case "AddInput": return _U.update(model,
+           {numOfInputs: model.numOfInputs + 1
+           ,data: A2($Basics._op["++"],
+           model.data,
+           _U.list([newData(model.numOfInputs)]))});
+         case "UpdateFieldValue": var updateField = function (data) {
+              return _U.eq(data.id,_p0._0) ? _U.update(data,
+              {value: _p0._1}) : data;
+           };
+           return _U.update(model,
+           {data: A2($List.map,updateField,model.data)});
+         default: return _U.update(model,
+           {data: A2($List.filter,
+           function (d) {
+              return !_U.eq(d.id,_p0._0);
+           },
+           model.data)});}
+   });
+   var emptyModel = {numOfInputs: 0,data: _U.list([])};
+   var init = F2(function (n,d) {
+      return {numOfInputs: n,data: d};
+   });
+   var UpdateFieldValue = F2(function (a,b) {
+      return {ctor: "UpdateFieldValue",_0: a,_1: b};
+   });
+   var RemoveInput = function (a) {
+      return {ctor: "RemoveInput",_0: a};
+   };
+   var addInput = F2(function (address,data) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.value(data.value)
+                      ,$Html$Attributes.autofocus(true)
+                      ,$Html$Attributes.placeholder("Enter ip here...")
+                      ,$Html$Attributes.name("Server input field")
+                      ,A3($Html$Events.on,
+                      "input",
+                      $Html$Events.targetValue,
+                      function (_p1) {
+                         return A2($Signal.message,
+                         address,
+                         A2(UpdateFieldValue,data.id,_p1));
+                      })]),
+              _U.list([]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              RemoveInput(data.id))]),
+              _U.list([$Html.text("Remove")]))]));
+   });
+   var inputs = F2(function (address,data) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,addInput(address),data));
+   });
+   var AddInput = {ctor: "AddInput"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+              _U.list([]),
+              _U.list([$Html.text("Server")]))
+              ,A2($Html.section,
+              _U.list([$Html$Attributes.id("server-config")]),
+              _U.list([A3($Html$Lazy.lazy2,inputs,address,model.data)
+                      ,A2($Html.button,
+                      _U.list([A2($Html$Events.onClick,address,AddInput)]),
+                      _U.list([$Html.text("Add IP")]))]))]));
+   });
+   var NoOp = {ctor: "NoOp"};
+   var actions = $Signal.mailbox(NoOp);
+   var model = A3($Signal.foldp,update,emptyModel,actions.signal);
+   var main = A2($Signal.map,view(actions.address),model);
+   var Data = F2(function (a,b) {    return {value: a,id: b};});
+   var Model = F2(function (a,b) {
+      return {numOfInputs: a,data: b};
+   });
+   return _elm.Characteristic.values = {_op: _op
+                                       ,init: init
+                                       ,update: update
+                                       ,view: view
+                                       ,Model: Model
+                                       ,Data: Data};
+};
