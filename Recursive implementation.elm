@@ -12,7 +12,7 @@ type Tree =
     Empty
     | Node Int Tree
 
-type alias Model =  Tree
+type alias Model = Tree
 
 -- UPDATE
 
