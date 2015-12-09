@@ -36,7 +36,7 @@ newServer n =
 emptyModel : Model
 emptyModel = 
     {
-        index = 0,
+        index = 1,
         servers = []
     }
 
@@ -70,12 +70,17 @@ view address model =
       --  div[] ( )
     div[]
     [
-
-        lazy2 List.map showServer address model.servers,
-        --lazy2 showServers address model.servers,
+        lazy2 showServers address model.servers,
+        br[][],
         button[ onClick address AddServer ][ text "Add Server" ]
+        
     ]
+
+showServers : Address Action -> List Server -> Html
+showServers address servers = 
+    div[] <| List.map (showServer address) servers
 {-
+
 
 showServers : Address Action -> List Server -> Html
 showServers address servers =
@@ -88,10 +93,10 @@ showServer : Address Action -> Server -> Html
 showServer address server =
     div[]
     [
-        h1[][text <| "Server " ++ server.id],
-        --(Characteristics.view (Signal.forwardTo address (ModifyServer server.id)) server.model]),
-        button [ onClick address <| RemoveServer server.id ] [ text <| "Remove sever " ++ toString server.id ],
-        br[]
+        h1[][text server.name ],
+        (Characteristics.view (Signal.forwardTo address (ModifyServer server.id)) server.model),
+        button [ onClick address <| RemoveServer server.id ] [ text <| "Remove " ++ server.name ],
+        br[][]
     ]
 
 model : Signal Model

@@ -11504,7 +11504,7 @@ Elm.Main.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var emptyModel = {index: 0,servers: _U.list([])};
+   var emptyModel = {index: 1,servers: _U.list([])};
    var newServer = function (n) {
       return {model: $Characteristics.init
              ,name: A2($Basics._op["++"],"Server ",$Basics.toString(n))
@@ -11540,30 +11540,43 @@ Elm.Main.make = function (_elm) {
    var ModifyServer = F2(function (a,b) {
       return {ctor: "ModifyServer",_0: a,_1: b};
    });
+   var AddServer = {ctor: "AddServer"};
+   var RemoveServer = function (a) {
+      return {ctor: "RemoveServer",_0: a};
+   };
    var showServer = F2(function (address,server) {
-      return A2($Characteristics.view,
-      A2($Signal.forwardTo,address,ModifyServer(server.id)),
-      server.model);
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+              _U.list([]),
+              _U.list([$Html.text(server.name)]))
+              ,A2($Characteristics.view,
+              A2($Signal.forwardTo,address,ModifyServer(server.id)),
+              server.model)
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              RemoveServer(server.id))]),
+              _U.list([$Html.text(A2($Basics._op["++"],
+              "Remove ",
+              server.name))]))
+              ,A2($Html.br,_U.list([]),_U.list([]))]));
    });
    var showServers = F2(function (address,servers) {
       return A2($Html.div,
       _U.list([]),
       A2($List.map,showServer(address),servers));
    });
-   var AddServer = {ctor: "AddServer"};
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([]),
-      _U.list([$Html.text("hello")
-              ,A3($Html$Lazy.lazy2,showServers,address,model.servers)
+      _U.list([A3($Html$Lazy.lazy2,showServers,address,model.servers)
+              ,A2($Html.br,_U.list([]),_U.list([]))
               ,A2($Html.button,
               _U.list([A2($Html$Events.onClick,address,AddServer)]),
               _U.list([$Html.text("Add Server")]))]));
    });
    var main = A2($Signal.map,view(actions.address),model);
-   var RemoveServer = function (a) {
-      return {ctor: "RemoveServer",_0: a};
-   };
    var Server = F3(function (a,b,c) {
       return {model: a,name: b,id: c};
    });
