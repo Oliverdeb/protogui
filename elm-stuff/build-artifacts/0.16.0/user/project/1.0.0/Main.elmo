@@ -13,7 +13,8 @@ Elm.Main.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
    var _op = {};
    var emptyModel = {index: 1,servers: _U.list([])};
    var newServer = function (n) {
@@ -70,7 +71,7 @@ Elm.Main.make = function (_elm) {
               RemoveServer(server.id))]),
               _U.list([$Html.text(A2($Basics._op["++"],
               "Remove ",
-              server.name))]))
+              $String.toLower(server.name)))]))
               ,A2($Html.br,_U.list([]),_U.list([]))]));
    });
    var showServers = F2(function (address,servers) {

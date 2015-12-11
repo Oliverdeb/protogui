@@ -1,0 +1,25 @@
+Elm.Decoder = Elm.Decoder || {};
+Elm.Decoder.make = function (_elm) {
+   "use strict";
+   _elm.Decoder = _elm.Decoder || {};
+   if (_elm.Decoder.values) return _elm.Decoder.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var age = A2($Json$Decode._op[":="],"age",$Json$Decode.$int);
+   var test = "{   \"age\": 42 }";
+   var main = $Graphics$Element.show(A2($Json$Decode.decodeString,
+   age,
+   test));
+   return _elm.Decoder.values = {_op: _op
+                                ,test: test
+                                ,age: age
+                                ,main: main};
+};

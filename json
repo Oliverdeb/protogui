@@ -1,0 +1,104 @@
+
+
+
+
+
+Object
+	"{" KeyValues "}"
+
+KeyValues
+	KeyValue
+  | KeyValues "," KeyValue
+
+KeyValue
+	Key ":" Value
+
+Key
+	string_lit
+
+Value
+	Object
+	Array
+	string_lit
+
+Array
+	"[" Values "]"
+
+Values
+	Value
+  | Values "," Value
+
+
+
+
+{"foo": {"bar": ["a", "b"]}}
+
+
+
+
+
+
+
+type alias Name = String
+
+type alias Structure = { 
+	Name : String 
+	, Fields : List Field
+}
+
+type alias Field = Singular Name
+				|  Many Name
+				|  Structure Name
+
+
+
+jsontext = '
+{
+	"Structure": {
+		"Name": "Server",
+		"Fields": [
+			{
+				"Type": "Many",
+				"Name": "IPs",
+			}
+		],
+	}
+}
+'
+
+Structure 
+	Name = "Server" 
+	Fields = List	[
+		Structure "IPs" "String"
+	]
+
+formStructure = decodeString (Decoder Structure) jsontext
+
+
+
+
+message Instruction {
+	Subject Person = 1;
+	Action union {
+		Remove
+		Add
+		Modify
+	} = 2;
+}
+
+message Remove {
+	
+}
+
+message Add {
+	
+}
+
+message Modify {
+	
+}
+
+
+
+
+

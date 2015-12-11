@@ -5,6 +5,7 @@ import Html exposing(..)
 import Html.Events exposing(..)
 import Html.Lazy exposing (lazy2)
 import Signal exposing (Address)
+import String exposing(toLower)
 
 type alias Model = 
     {
@@ -95,7 +96,7 @@ showServer address server =
     [
         h1[][text server.name ],
         (Characteristics.view (Signal.forwardTo address (ModifyServer server.id)) server.model),
-        button [ onClick address <| RemoveServer server.id ] [ text <| "Remove " ++ server.name ],
+        button [ onClick address <| RemoveServer server.id ] [ text <| "Remove " ++ toLower server.name ],
         br[][]
     ]
 

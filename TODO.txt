@@ -1,0 +1,3 @@
+Get JSON from protocol buffers -> decode JSON into various structures which will have to be predefined
+	Then figure out a way to show the various characteristics required. Maybe a boolean of some type using list.map
+	
