@@ -5,109 +5,91 @@ Elm.Main.make = function (_elm) {
    if (_elm.Main.values) return _elm.Main.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Characteristics = Elm.Characteristics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Decoder = Elm.Decoder.make(_elm),
+   $Fields = Elm.Fields.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Html$Lazy = Elm.Html.Lazy.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var emptyModel = {index: 1,servers: _U.list([])};
-   var newServer = function (n) {
-      return {model: $Characteristics.init
-             ,name: A2($Basics._op["++"],"Server ",$Basics.toString(n))
-             ,id: n};
+   var showField = function (field) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([$Html.text(field.name)]));
    };
+   var newDataType = {name: "new type",fields: $Fields.init};
    var update = F2(function (action,model) {
       var _p0 = action;
       switch (_p0.ctor)
       {case "NoOp": return model;
-         case "AddServer": return _U.update(model,
-           {index: model.index + 1
-           ,servers: A2($Basics._op["++"],
-           model.servers,
-           _U.list([newServer(model.index)]))});
-         case "RemoveServer": return _U.update(model,
-           {servers: A2($List.filter,
-           function (s) {
-              return !_U.eq(s.id,_p0._0);
+         case "AddType": return _U.update(model,
+           {dataTypes: A2($Basics._op["++"],
+           model.dataTypes,
+           _U.list([newDataType]))});
+         case "RemoveType": return _U.update(model,
+           {dataTypes: A2($List.filter,
+           function (datatype) {
+              return !_U.eq(datatype.name,_p0._0);
            },
-           model.servers)});
-         default: var updateServer = function (server) {
-              return _U.eq(server.id,_p0._0) ? _U.update(server,
-              {model: A2($Characteristics.update,
-              _p0._1,
-              server.model)}) : server;
+           model.dataTypes)});
+         default: var updateDataType = function (datatype) {
+              return _U.eq(datatype.name,_p0._0) ? _U.update(datatype,
+              {fields: A2($Fields.update,_p0._1,datatype.fields)}) : datatype;
            };
            return _U.update(model,
-           {servers: A2($List.map,updateServer,model.servers)});}
+           {dataTypes: A2($List.map,updateDataType,model.dataTypes)});}
    });
    var NoOp = {ctor: "NoOp"};
    var actions = $Signal.mailbox(NoOp);
-   var model = A3($Signal.foldp,update,emptyModel,actions.signal);
-   var ModifyServer = F2(function (a,b) {
-      return {ctor: "ModifyServer",_0: a,_1: b};
+   var model = A3($Signal.foldp,
+   update,
+   $Decoder.getModel,
+   actions.signal);
+   var ModifyType = F2(function (a,b) {
+      return {ctor: "ModifyType",_0: a,_1: b};
    });
-   var AddServer = {ctor: "AddServer"};
-   var RemoveServer = function (a) {
-      return {ctor: "RemoveServer",_0: a};
-   };
-   var showServer = F2(function (address,server) {
-      return A2($Html.div,
+   var checkType = F2(function (address,datatype) {
+      return _U.eq(datatype.name,"Server") ? A2($Html.div,
       _U.list([]),
       _U.list([A2($Html.h1,
               _U.list([]),
-              _U.list([$Html.text(server.name)]))
-              ,A2($Characteristics.view,
-              A2($Signal.forwardTo,address,ModifyServer(server.id)),
-              server.model)
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,
-              address,
-              RemoveServer(server.id))]),
-              _U.list([$Html.text(A2($Basics._op["++"],
-              "Remove ",
-              $String.toLower(server.name)))]))
-              ,A2($Html.br,_U.list([]),_U.list([]))]));
+              _U.list([$Html.text(datatype.name)]))
+              ,A2($Fields.view,
+              A2($Signal.forwardTo,address,ModifyType(datatype.name)),
+              datatype.fields)
+              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Fields.view,
+      A2($Signal.forwardTo,address,ModifyType(datatype.name)),
+      datatype.fields);
    });
-   var showServers = F2(function (address,servers) {
+   var setupForm = F2(function (address,datatypes) {
       return A2($Html.div,
       _U.list([]),
-      A2($List.map,showServer(address),servers));
+      A2($List.map,checkType(address),datatypes));
    });
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([]),
-      _U.list([A3($Html$Lazy.lazy2,showServers,address,model.servers)
-              ,A2($Html.br,_U.list([]),_U.list([]))
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,AddServer)]),
-              _U.list([$Html.text("Add Server")]))]));
+      _U.list([A2(setupForm,address,model.dataTypes)
+              ,A2($Html.br,_U.list([]),_U.list([]))]));
    });
    var main = A2($Signal.map,view(actions.address),model);
-   var Server = F3(function (a,b,c) {
-      return {model: a,name: b,id: c};
-   });
-   var Model = F2(function (a,b) {
-      return {index: a,servers: b};
-   });
+   var AddType = {ctor: "AddType"};
+   var RemoveType = function (a) {
+      return {ctor: "RemoveType",_0: a};
+   };
    return _elm.Main.values = {_op: _op
-                             ,Model: Model
-                             ,Server: Server
-                             ,RemoveServer: RemoveServer
-                             ,AddServer: AddServer
-                             ,ModifyServer: ModifyServer
+                             ,RemoveType: RemoveType
+                             ,AddType: AddType
+                             ,ModifyType: ModifyType
                              ,NoOp: NoOp
-                             ,newServer: newServer
-                             ,emptyModel: emptyModel
+                             ,newDataType: newDataType
                              ,update: update
                              ,view: view
-                             ,showServers: showServers
-                             ,showServer: showServer
+                             ,setupForm: setupForm
+                             ,checkType: checkType
+                             ,showField: showField
                              ,model: model
                              ,actions: actions
                              ,main: main};

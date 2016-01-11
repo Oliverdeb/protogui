@@ -1,44 +1,27 @@
-module Main where
+module Main  where 
 
-import Characteristics
+import Fields
+import Decoder
 import Html exposing(..)
 import Html.Events exposing(..)
-import Html.Lazy exposing (lazy2)
+import Html.Lazy exposing (lazy2)   
 import Signal exposing (Address)
 import String exposing(toLower)
 
-type alias Model = 
-    {
-        index : Int,
-        servers : List Server
-    }
-
-type alias Server = 
-    {
-        model : Characteristics.Model,
-        name : String,
-        id : Int
-    }
-
 type Action =
-    RemoveServer Int
-    | AddServer 
-    | ModifyServer Int Characteristics.Action
+    RemoveType String
+    | AddType 
+    | ModifyType String Fields.Action
     | NoOp
 
-newServer : Int -> Server
-newServer n =
-    {
-        model = Characteristics.init,
-        name = "Server " ++ toString n,
-        id = n
-    }
+type alias Model = Decoder.DataModel
 
-emptyModel : Model
-emptyModel = 
+newDataType : Decoder.DataType
+newDataType =
     {
-        index = 1,
-        servers = []
+        name = "new type",
+        fields = Fields.init
+        
     }
 
 update : Action -> Model -> Model
@@ -46,63 +29,61 @@ update action model =
     case action of
         NoOp ->
             model
-        AddServer ->
-            { model |   index = model.index + 1,
-                        servers =  model.servers ++ [newServer model.index] }
 
-        RemoveServer n ->
-            { model | servers = List.filter (\s -> s.id /= n) model.servers }
+        AddType ->
+                { model | dataTypes = model.dataTypes ++ [newDataType] }   
 
-        ModifyServer n action ->
-            let updateServer server =
-                if server.id == n then
-                    { server | model = Characteristics.update  action server.model }
+        RemoveType name ->
+            { model | dataTypes = List.filter (\datatype -> datatype.name /= name) model.dataTypes }
+
+        ModifyType name action ->
+            let updateDataType datatype =
+                if datatype.name == name then
+                    { datatype | fields = Fields.update action datatype.fields }
                 else
-                    server
+                    datatype
             in 
-            { model | servers = List.map updateServer model.servers }
+            { model | dataTypes = List.map updateDataType model.dataTypes }
 
 view : Address Action -> Model -> Html
 view address model = 
-    --let server = 
-    --    (List.map showServer model.server)
-
-    --in
-      --  div[] ( )
     div[]
     [
-        lazy2 showServers address model.servers,
-        br[][],
-        button[ onClick address AddServer ][ text "Add Server" ]
-        
+          setupForm address model.dataTypes
+        , br[][]
+        --, button [ onClick address AddType ] [ text "New type" ]
     ]
 
-showServers : Address Action -> List Server -> Html
-showServers address servers = 
-    div[] <| List.map (showServer address) servers
-{-
 
+-- IMPLEMENT LAZY
 
-showServers : Address Action -> List Server -> Html
-showServers address servers =
-    div[] <| List.map (showServer address) servers
+setupForm : Address Action -> List Decoder.DataType -> Html
+setupForm address datatypes =
+    div[] (List.map (checkType address) datatypes)
 
--}
+checkType : Address Action -> Decoder.DataType -> Html
+checkType address datatype =
+    if datatype.name == "Server" then --<------- change to model.root ? signal problem
+        div[] 
+        [ 
+              h1[][ text datatype.name ] 
+            , (Fields.view (Signal.forwardTo address (ModifyType datatype.name)) datatype.fields)
+            , br[][]
+        ]
+    else
+        (Fields.view (Signal.forwardTo address (ModifyType datatype.name)) datatype.fields)
 
+showField : Decoder.Field -> Html
+showField field =
+    div[][text field.name]
 
-showServer : Address Action -> Server -> Html
-showServer address server =
-    div[]
-    [
-        h1[][text server.name ],
-        (Characteristics.view (Signal.forwardTo address (ModifyServer server.id)) server.model),
-        button [ onClick address <| RemoveServer server.id ] [ text <| "Remove " ++ toLower server.name ],
-        br[][]
-    ]
+--getType : String -> Decoder.DataType
+--getType kind =
+--    List.filter (\datatype -> datatype.kind == kind) model.dataTypes
 
 model : Signal Model
 model =
-    Signal.foldp update emptyModel actions.signal
+    Signal.foldp update Decoder.getModel actions.signal
 
 actions : Signal.Mailbox Action
 actions =
@@ -110,5 +91,5 @@ actions =
 
 
 main : Signal Html
-main = 
+main =
     Signal.map (view actions.address) model
