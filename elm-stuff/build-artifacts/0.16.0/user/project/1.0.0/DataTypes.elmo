@@ -1,0 +1,85 @@
+Elm.DataTypes = Elm.DataTypes || {};
+Elm.DataTypes.make = function (_elm) {
+   "use strict";
+   _elm.DataTypes = _elm.DataTypes || {};
+   if (_elm.DataTypes.values) return _elm.DataTypes.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Decoder = Elm.Decoder.make(_elm),
+   $Fields = Elm.Fields.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var showField = function (field) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([$Html.text(field.name)]));
+   };
+   var newDataType = {name: "new type",fields: $Fields.init};
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "NoOp": return model;
+         case "AddType": return _U.update(model,
+           {dataTypes: A2($Basics._op["++"],
+           model.dataTypes,
+           _U.list([newDataType]))});
+         case "RemoveType": return _U.update(model,
+           {dataTypes: A2($List.filter,
+           function (datatype) {
+              return !_U.eq(datatype.name,_p0._0);
+           },
+           model.dataTypes)});
+         default: var updateDataType = function (datatype) {
+              return _U.eq(datatype.name,_p0._0) ? _U.update(datatype,
+              {fields: A2($Fields.update,_p0._1,datatype.fields)}) : datatype;
+           };
+           return _U.update(model,
+           {dataTypes: A2($List.map,updateDataType,model.dataTypes)});}
+   });
+   var NoOp = {ctor: "NoOp"};
+   var actions = $Signal.mailbox(NoOp);
+   var ModifyType = F2(function (a,b) {
+      return {ctor: "ModifyType",_0: a,_1: b};
+   });
+   var checkType = F2(function (address,datatype) {
+      return _U.eq(datatype.name,"Server") ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+              _U.list([]),
+              _U.list([$Html.text(datatype.name)]))
+              ,A2($Fields.view,
+              A2($Signal.forwardTo,address,ModifyType(datatype.name)),
+              datatype.fields)
+              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Fields.view,
+      A2($Signal.forwardTo,address,ModifyType(datatype.name)),
+      datatype.fields);
+   });
+   var setupForm = F2(function (address,datatypes) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,checkType(address),datatypes));
+   });
+   var AddType = {ctor: "AddType"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2(setupForm,address,model.dataTypes)
+              ,A2($Html.br,_U.list([]),_U.list([]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,AddType)]),
+              _U.list([$Html.text("New type")]))]));
+   });
+   var RemoveType = function (a) {
+      return {ctor: "RemoveType",_0: a};
+   };
+   return _elm.DataTypes.values = {_op: _op
+                                  ,update: update
+                                  ,view: view
+                                  ,actions: actions};
+};
