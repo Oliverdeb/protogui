@@ -11393,6 +11393,7 @@ Elm.Decoder.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -11448,8 +11449,26 @@ Elm.Decoder.make = function (_elm) {
             return setModel(emptyModel);
          }
    }();
+   var getDataType = function (kind) {
+      return A2($List.filter,
+      function (dtype) {
+         return _U.eq(dtype.name,kind);
+      },
+      getModel.dataTypes);
+   };
+   var main = function () {
+      var _p1 = A2($Json$Decode.decodeString,
+      dataModelDecoder,
+      jsonString);
+      if (_p1.ctor === "Ok") {
+            return $Graphics$Element.show("work plesae");
+         } else {
+            return $Graphics$Element.show("??????????");
+         }
+   }();
    return _elm.Decoder.values = {_op: _op
                                 ,getModel: getModel
+                                ,getDataType: getDataType
                                 ,DataModel: DataModel
                                 ,DataType: DataType
                                 ,Field: Field};
@@ -11464,48 +11483,104 @@ Elm.Fields.make = function (_elm) {
    $Debug = Elm.Debug.make(_elm),
    $Decoder = Elm.Decoder.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var fromJust = function (x) {
+      var _p0 = x;
+      if (_p0.ctor === "Just") {
+            return _p0._0;
+         } else {
+            return _U.crashCase("Fields",
+            {start: {line: 94,column: 14},end: {line: 96,column: 53}},
+            _p0)("error: fromJust Nothing");
+         }
+   };
+   var newField = function (kind$) {
+      return {name: "New field",kind: kind$,repeated: false};
+   };
    var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
+      var _p2 = action;
+      switch (_p2.ctor)
       {case "NoOp": return model;
-         case "AddField": return model;
-         case "UpdateFieldValue": var updateField = function (field) {
-              return _U.eq(field.name,_p0._0) ? _U.update(field,
-              {name: _p0._1}) : field;
-           };
-           return A2($List.map,updateField,model);
+         case "AddField": return A2($Basics._op["++"],
+           model,
+           _U.list([newField(_p2._0)]));
+         case "UpdateFieldValue": return model;
          default: return A2($List.filter,
            function (field) {
-              return !_U.eq(field.name,_p0._0);
+              return !_U.eq(field.name,_p2._0);
            },
            model);}
    });
    var init = _U.list([]);
    var basicTypes = _U.list(["String","Int"]);
-   var displayFields = F2(function (address,field) {
-      return A2($List.member,field.kind,basicTypes) ? A2($Html.h2,
-      _U.list([]),
-      _U.list([$Html.text(field.name)])) : A2($Html.h2,
-      _U.list([]),
-      _U.list([$Html.text(field.name)]));
-   });
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      A2($List.map,displayFields(address),model));
-   });
    var UpdateFieldValue = F2(function (a,b) {
       return {ctor: "UpdateFieldValue",_0: a,_1: b};
    });
    var RemoveField = function (a) {
       return {ctor: "RemoveField",_0: a};
    };
-   var AddField = {ctor: "AddField"};
+   var AddField = function (a) {
+      return {ctor: "AddField",_0: a};
+   };
+   var displayFields = F2(function (address,field) {
+      return A2($List.member,
+      field.kind,
+      basicTypes) ? field.repeated ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.p,
+              _U.list([]),
+              _U.list([$Html.text(A2($Basics._op["++"],field.name,":"))]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              RemoveField(field.name))]),
+              _U.list([$Html.text(A2($Basics._op["++"],
+              " Remove ",
+              field.name))]))])) : A2($Html.p,
+      _U.list([]),
+      _U.list([$Html.text(A2($Basics._op["++"],
+      field.name,
+      ":"))])) : field.repeated ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.p,
+              _U.list([]),
+              _U.list([$Html.text(A2($Basics._op["++"],field.name,":"))]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              RemoveField(field.name))]),
+              _U.list([$Html.text(A2($Basics._op["++"],
+              " Remove ",
+              field.name))]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              AddField(field.kind))]),
+              _U.list([$Html.text(A2($Basics._op["++"]," Add ",field.name))]))
+              ,A2(displayTypeFields,address,field.kind)])) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.p,
+              _U.list([]),
+              _U.list([$Html.text(A2($Basics._op["++"],field.name,":"))]))
+              ,A2(displayTypeFields,address,field.kind)]));
+   });
+   var displayTypeFields = F2(function (address,kind) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,
+      displayFields(address),
+      fromJust($List.head($Decoder.getDataType(kind))).fields));
+   });
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,displayFields(address),model));
+   });
    var NoOp = {ctor: "NoOp"};
    return _elm.Fields.values = {_op: _op
                                ,init: init
@@ -11573,9 +11648,9 @@ Elm.Main.make = function (_elm) {
               ,A2($Fields.view,
               A2($Signal.forwardTo,address,ModifyType(datatype.name)),
               datatype.fields)
-              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Fields.view,
-      A2($Signal.forwardTo,address,ModifyType(datatype.name)),
-      datatype.fields);
+              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Html.div,
+      _U.list([]),
+      _U.list([]));
    });
    var setupForm = F2(function (address,datatypes) {
       return A2($Html.div,

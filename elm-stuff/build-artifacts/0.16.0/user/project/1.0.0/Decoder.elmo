@@ -6,6 +6,7 @@ Elm.Decoder.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -61,8 +62,26 @@ Elm.Decoder.make = function (_elm) {
             return setModel(emptyModel);
          }
    }();
+   var getDataType = function (kind) {
+      return A2($List.filter,
+      function (dtype) {
+         return _U.eq(dtype.name,kind);
+      },
+      getModel.dataTypes);
+   };
+   var main = function () {
+      var _p1 = A2($Json$Decode.decodeString,
+      dataModelDecoder,
+      jsonString);
+      if (_p1.ctor === "Ok") {
+            return $Graphics$Element.show("work plesae");
+         } else {
+            return $Graphics$Element.show("??????????");
+         }
+   }();
    return _elm.Decoder.values = {_op: _op
                                 ,getModel: getModel
+                                ,getDataType: getDataType
                                 ,DataModel: DataModel
                                 ,DataType: DataType
                                 ,Field: Field};

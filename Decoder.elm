@@ -1,5 +1,6 @@
-module Decoder (getModel, DataModel, DataType, Field) where
+module Decoder (getModel, getDataType, DataModel, DataType, Field) where
 
+import Debug
 import Graphics.Element exposing (show)
 import Dict exposing (Dict)
 import Json.Decode exposing (Decoder, (:=), succeed, object2, list,string, bool, dict, int, maybe, decodeString, map)
@@ -19,6 +20,9 @@ type alias Field = {
      , kind : String
      , repeated : Bool
 }
+
+
+
 
 model : Model
 model = emptyModel
@@ -99,8 +103,21 @@ setModel value =
     { model |   root = value.root,
                 dataTypes = value.dataTypes }
 
---main =
---    case (decodeString dataModelDecoder jsonString) of
---        Ok value -> show <| setModel value
---        Err msg -> show  <| setModel emptyModel
+getDataType : String -> List DataType
+getDataType kind = 
+    List.filter (\dtype -> dtype.name == kind) getModel.dataTypes
+
+--fromJust : Maybe a -> a
+--fromJust x = case x of
+--    Just y -> y
+--    Nothing -> Debug.crash "error: fromJust Nothing"
+
+--getDataType kind vak =    
+--    show vak
+    --show <|  List.filter (\datatype -> datatype.name /= kind) model.dataTypes
+
     
+main =
+    case (decodeString dataModelDecoder jsonString) of
+        Ok value ->  show "work plesae" --getDataType "Server" value
+        Err msg  ->  show "??????????"

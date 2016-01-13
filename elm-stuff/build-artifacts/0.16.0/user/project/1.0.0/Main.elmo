@@ -59,9 +59,9 @@ Elm.Main.make = function (_elm) {
               ,A2($Fields.view,
               A2($Signal.forwardTo,address,ModifyType(datatype.name)),
               datatype.fields)
-              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Fields.view,
-      A2($Signal.forwardTo,address,ModifyType(datatype.name)),
-      datatype.fields);
+              ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Html.div,
+      _U.list([]),
+      _U.list([]));
    });
    var setupForm = F2(function (address,datatypes) {
       return A2($Html.div,

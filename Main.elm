@@ -36,7 +36,7 @@ update action model =
         RemoveType name ->
             { model | dataTypes = List.filter (\datatype -> datatype.name /= name) model.dataTypes }
 
-        ModifyType name action ->
+        ModifyType name action ->            
             let updateDataType datatype =
                 if datatype.name == name then
                     { datatype | fields = Fields.update action datatype.fields }
@@ -44,6 +44,7 @@ update action model =
                     datatype
             in 
             { model | dataTypes = List.map updateDataType model.dataTypes }
+
 
 view : Address Action -> Model -> Html
 view address model = 
@@ -67,11 +68,13 @@ checkType address datatype =
         div[] 
         [ 
               h1[][ text datatype.name ] 
+                -- Call the view function in fields, forward it the Address Action and the list of fields (which is the model for fields)
+                -- the fields module has a model : List Field, so this works out nicely.
             , (Fields.view (Signal.forwardTo address (ModifyType datatype.name)) datatype.fields)
             , br[][]
         ]
     else
-        (Fields.view (Signal.forwardTo address (ModifyType datatype.name)) datatype.fields)
+        div[][]
 
 showField : Decoder.Field -> Html
 showField field =
@@ -87,7 +90,7 @@ model =
 
 actions : Signal.Mailbox Action
 actions =
-  Signal.mailbox NoOp
+    Signal.mailbox NoOp
 
 
 main : Signal Html
