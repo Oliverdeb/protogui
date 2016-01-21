@@ -1,0 +1,40 @@
+Elm.Field = Elm.Field || {};
+Elm.Field.make = function (_elm) {
+   "use strict";
+   _elm.Field = _elm.Field || {};
+   if (_elm.Field.values) return _elm.Field.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StructureDecoder = Elm.StructureDecoder.make(_elm);
+   var _op = {};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([$Html.text(A2($Basics._op["++"],model.name,": "))
+              ,A2($Html.input,
+              _U.list([$Html$Attributes.placeholder(A2($Basics._op["++"],
+              "Enter ",
+              A2($Basics._op["++"],model.name,"here...")))]),
+              _U.list([]))]));
+   });
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      if (_p0.ctor === "NoOp") {
+            return model;
+         } else {
+            return model;
+         }
+   });
+   var UpdateFieldValue = function (a) {
+      return {ctor: "UpdateFieldValue",_0: a};
+   };
+   var NoOp = {ctor: "NoOp"};
+   return _elm.Field.values = {_op: _op,update: update,view: view};
+};

@@ -1,0 +1,70 @@
+Elm.StructureDecoder = Elm.StructureDecoder || {};
+Elm.StructureDecoder.make = function (_elm) {
+   "use strict";
+   _elm.StructureDecoder = _elm.StructureDecoder || {};
+   if (_elm.StructureDecoder.values)
+   return _elm.StructureDecoder.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var jsonString = "\n{\n     \"root\": \"Server\",    \n     \"dataTypes\": [\n         {\n             \"name\": \"Server\",\n             \"fields\": [\n                 {\"name\": \"Hostname\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"Interfaces\", \"kind\": \"Interface\", \"repeated\": true}\n             ]\n         },\n         {\n             \"name\": \"Interface\",\n             \"fields\": [\n                 {\"name\": \"Name\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"MAC\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"IPs\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         }\n     ]\n}\n";
+   var apply = $Json$Decode.object2(F2(function (x,y) {
+      return x(y);
+   }));
+   var constructing = $Json$Decode.succeed;
+   var emptyModel = {dataTypes: _U.list([]),root: ""};
+   var model = emptyModel;
+   var setModel = function (value) {
+      return _U.update(model,
+      {root: value.root,dataTypes: value.dataTypes});
+   };
+   var Field = F3(function (a,b,c) {
+      return {name: a,kind: b,repeated: c};
+   });
+   var fieldDecoder = A2(apply,
+   A2(apply,
+   A2(apply,
+   constructing(Field),
+   A2($Json$Decode._op[":="],"name",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"kind",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"repeated",$Json$Decode.bool));
+   var fieldsDecoder = $Json$Decode.list(fieldDecoder);
+   var DataType = F2(function (a,b) {
+      return {name: a,fields: b};
+   });
+   var dataTypeDecoder = A2(apply,
+   A2(apply,
+   constructing(DataType),
+   A2($Json$Decode._op[":="],"name",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"fields",fieldsDecoder));
+   var dataTypesDecoder = $Json$Decode.list(dataTypeDecoder);
+   var DataModel = F2(function (a,b) {
+      return {dataTypes: a,root: b};
+   });
+   var dataModelDecoder = A2(apply,
+   A2(apply,
+   constructing(DataModel),
+   A2($Json$Decode._op[":="],"dataTypes",dataTypesDecoder)),
+   A2($Json$Decode._op[":="],"root",$Json$Decode.string));
+   var getModel = function () {
+      var _p0 = A2($Json$Decode.decodeString,
+      dataModelDecoder,
+      jsonString);
+      if (_p0.ctor === "Ok") {
+            return setModel(_p0._0);
+         } else {
+            return setModel(emptyModel);
+         }
+   }();
+   return _elm.StructureDecoder.values = {_op: _op
+                                         ,getModel: getModel
+                                         ,DataModel: DataModel
+                                         ,DataType: DataType
+                                         ,Field: Field};
+};

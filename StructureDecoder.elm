@@ -1,4 +1,4 @@
-module Decoder (getModel, getDataType, DataModel, DataType, Field) where
+module StructureDecoder (getModel, DataModel, DataType, Field) where
 
 import Debug
 import Graphics.Element exposing (show)
@@ -103,21 +103,8 @@ setModel value =
     { model |   root = value.root,
                 dataTypes = value.dataTypes }
 
-getDataType : String -> List DataType
-getDataType kind = 
-    List.filter (\dtype -> dtype.name == kind) getModel.dataTypes
 
---fromJust : Maybe a -> a
---fromJust x = case x of
---    Just y -> y
---    Nothing -> Debug.crash "error: fromJust Nothing"
-
---getDataType kind vak =    
---    show vak
-    --show <|  List.filter (\datatype -> datatype.name /= kind) model.dataTypes
-
-    
-main =
-    case (decodeString dataModelDecoder jsonString) of
-        Ok value ->  show "work plesae" --getDataType "Server" value
-        Err msg  ->  show "??????????"
+--main =
+--  case (decodeString dataModelDecoder jsonString) of
+--      Ok value -> show value
+--      Err msg -> show msg

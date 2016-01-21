@@ -1,27 +1,39 @@
 module Main  where 
 
-import Fields
-import Decoder
+-- IMPLEMENT LAZY.
+-- dictionary of actual values - updating of values using dict? 
+-- passing actions through to the lower models.
+import StructureDecoder exposing (DataModel)
+import DataModel
 import Html exposing(..)
 import Html.Events exposing(..)
 import Html.Lazy exposing (lazy2)   
 import Signal exposing (Address)
-import String exposing(toLower)
 
 type Action =
-    RemoveType String
-    | AddType 
-    | ModifyType String Fields.Action
+    RemoveModel Int
+    | AddModel
+    | ModifyModel Int DataModel.Action
     | NoOp
 
-type alias Model = Decoder.DataModel
-
-newDataType : Decoder.DataType
-newDataType =
+type alias IndexedDataModel = 
     {
-        name = "new type",
-        fields = Fields.init
-        
+        datamodel : StructureDecoder.DataModel
+        , id : Int
+    }
+
+type alias Model = 
+    {
+        datamodels : List IndexedDataModel
+        , index : Int
+    }
+
+newDataModel : Int -> IndexedDataModel 
+newDataModel index =
+    {
+          datamodel = StructureDecoder.getModel
+        , id = index
+
     }
 
 update : Action -> Model -> Model
@@ -30,63 +42,50 @@ update action model =
         NoOp ->
             model
 
-        AddType ->
-                { model | dataTypes = model.dataTypes ++ [newDataType] }   
+        AddModel ->
+            { model | index = model.index + 1
+                    , datamodels = model.datamodels ++ [ newDataModel model.index ] }   
 
-        RemoveType name ->
-            { model | dataTypes = List.filter (\datatype -> datatype.name /= name) model.dataTypes }
+        RemoveModel id ->  
+            if id /= 0 then
+                { model | datamodels = List.filter (\datamodel -> datamodel.id /= id) model.datamodels }
+            else 
+                model
 
-        ModifyType name action ->            
-            let updateDataType datatype =
-                if datatype.name == name then
-                    { datatype | fields = Fields.update action datatype.fields }
-                else
-                    datatype
-            in 
-            { model | dataTypes = List.map updateDataType model.dataTypes }
-
+        ModifyModel id action -> -- pass modify action etc
+            model     
 
 view : Address Action -> Model -> Html
 view address model = 
-    div[]
+    div[]( List.map ( displayModel address ) model.datamodels )
+
+
+displayModel : Address Action -> IndexedDataModel -> Html
+displayModel address datamodel =
+    div[] 
     [
-          setupForm address model.dataTypes
-        , br[][]
-        --, button [ onClick address AddType ] [ text "New type" ]
-    ]
+        (DataModel.view (Signal.forwardTo address (ModifyModel datamodel.id)) datamodel.datamodel)
+        , button[ onClick address AddModel ] [ text <| "New " ++ datamodel.datamodel.root ]
+        , button[ onClick address (RemoveModel datamodel.id) ] [ text <|  "Remove " ++ datamodel.datamodel.root ]
+    ] 
 
+initiallDataModel : IndexedDataModel
+initiallDataModel = 
+    {
+          datamodel = StructureDecoder.getModel
+        , id = 0
+    }
 
--- IMPLEMENT LAZY
-
-setupForm : Address Action -> List Decoder.DataType -> Html
-setupForm address datatypes =
-    div[] (List.map (checkType address) datatypes)
-
-checkType : Address Action -> Decoder.DataType -> Html
-checkType address datatype =
-    if datatype.name == "Server" then --<------- change to model.root ? signal problem
-        div[] 
-        [ 
-              h1[][ text datatype.name ] 
-                -- Call the view function in fields, forward it the Address Action and the list of fields (which is the model for fields)
-                -- the fields module has a model : List Field, so this works out nicely.
-            , (Fields.view (Signal.forwardTo address (ModifyType datatype.name)) datatype.fields)
-            , br[][]
-        ]
-    else
-        div[][]
-
-showField : Decoder.Field -> Html
-showField field =
-    div[][text field.name]
-
---getType : String -> Decoder.DataType
---getType kind =
---    List.filter (\datatype -> datatype.kind == kind) model.dataTypes
+initialModel : Model
+initialModel = 
+    {
+        datamodels = [initiallDataModel]
+      , index = 1
+    }
 
 model : Signal Model
 model =
-    Signal.foldp update Decoder.getModel actions.signal
+    Signal.foldp update initialModel actions.signal
 
 actions : Signal.Mailbox Action
 actions =

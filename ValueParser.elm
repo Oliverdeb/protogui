@@ -1,17 +1,3 @@
-
-{-}
-"""
-{
-  "Hostname": "server01",
-  "Interfaces": [
-    {"Name": "eth0", "MAC": "00:11:22:33:44:55", IPs: ["10.1.1.1", "10.1.2.2"]}
-  ]
-}
-"""
-
--}
-
-
 import Json.Decode as Js exposing (Decoder, (:=))
 import Dict exposing (Dict)
 import Array exposing (Array)
@@ -103,12 +89,38 @@ null : Decoder Data
 null =
   Js.null Null
 
-main =
-  someJson
-  |> Js.decodeString (decoder ())
-  |> show
+--main =
+--  case moreJSON |> Js.decodeString (decoder ()) of
+--    Ok value -> show value
+--    Err msg -> show msg
+--  --moreJSON
+--  --|> Js.decodeString (decoder ())
+--  --|> show
+
+--main = 
+--  let res =  Js.decodeString (decoder ()) moreJSON
+--  in
+--  case res of
+--    Ok value -> show value
+--    Err msg -> show msg
 
 someJson : String
 someJson = """
 {"a":[1,2,3], "b" : 3}
 """
+
+moreJSON = """
+{
+  "Hostname": "server01",
+  "Interfaces": [
+    {"Name": "eth0", "MAC": "00:11:22:33:44:55", "IPs": ["10.1.1.1", "10.1.2.2"]}
+  ]
+}
+"""
+getValues : Dict 
+getValues = 
+  let parsed =  Js.decodeString (decoder ()) moreJSON
+  in
+  case parsed of
+    Ok value -> value
+    Err msg -> msg

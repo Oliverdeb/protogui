@@ -1,0 +1,114 @@
+Elm.DataModel = Elm.DataModel || {};
+Elm.DataModel.make = function (_elm) {
+   "use strict";
+   _elm.DataModel = _elm.DataModel || {};
+   if (_elm.DataModel.values) return _elm.DataModel.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Field = Elm.Field.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StructureDecoder = Elm.StructureDecoder.make(_elm);
+   var _op = {};
+   var fromJust = function (x) {
+      var _p0 = x;
+      if (_p0.ctor === "Just") {
+            return _p0._0;
+         } else {
+            return _U.crashCase("DataModel",
+            {start: {line: 86,column: 14},end: {line: 88,column: 74}},
+            _p0)("Error: fromJust nothing (empty JSON string?)");
+         }
+   };
+   var getDataType = F2(function (kind,model) {
+      return fromJust($List.head(A2($List.filter,
+      function (datatype) {
+         return _U.eq(datatype.name,kind);
+      },
+      model.dataTypes))).fields;
+   });
+   var update = F2(function (action,model) {
+      var _p2 = action;
+      switch (_p2.ctor)
+      {case "NoOp": return model;
+         case "AddField": return model;
+         case "RemoveField": return model;
+         default: return model;}
+   });
+   var newField = function (kind$) {
+      return {name: "New field",kind: kind$,repeated: false};
+   };
+   var basicTypes = _U.list(["String","Int"]);
+   var ModifyField = F2(function (a,b) {
+      return {ctor: "ModifyField",_0: a,_1: b};
+   });
+   var RemoveField = function (a) {
+      return {ctor: "RemoveField",_0: a};
+   };
+   var AddField = function (a) {
+      return {ctor: "AddField",_0: a};
+   };
+   var displayField = F3(function (address,model,field) {
+      return A2($List.member,
+      field.kind,
+      basicTypes) ? field.repeated ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Field.view,
+              A2($Signal.forwardTo,address,ModifyField(field.name)),
+              field)
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              AddField(field.name))]),
+              _U.list([$Html.text("Add/ remove")]))])) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Field.view,
+      A2($Signal.forwardTo,address,ModifyField(field.name)),
+      field)])) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Field.view,
+              A2($Signal.forwardTo,address,ModifyField(field.name)),
+              field)
+              ,A2($Html.div,
+              _U.list([]),
+              A2($List.map,
+              A2(displayField,address,model),
+              A2(getDataType,field.kind,model)))]));
+   });
+   var checkDataType = F3(function (address,model,datatype) {
+      return _U.eq(datatype.name,model.root) ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+              _U.list([]),
+              _U.list([$Html.text(datatype.name)]))
+              ,A2($Html.div,
+              _U.list([]),
+              A2($List.map,
+              A2(displayField,address,model),
+              datatype.fields))])) : A2($Html.div,_U.list([]),_U.list([]));
+   });
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.map,A2(checkDataType,address,model),model.dataTypes));
+   });
+   var NoOp = {ctor: "NoOp"};
+   return _elm.DataModel.values = {_op: _op
+                                  ,NoOp: NoOp
+                                  ,AddField: AddField
+                                  ,RemoveField: RemoveField
+                                  ,ModifyField: ModifyField
+                                  ,basicTypes: basicTypes
+                                  ,newField: newField
+                                  ,update: update
+                                  ,view: view
+                                  ,checkDataType: checkDataType
+                                  ,displayField: displayField
+                                  ,fromJust: fromJust
+                                  ,getDataType: getDataType};
+};
