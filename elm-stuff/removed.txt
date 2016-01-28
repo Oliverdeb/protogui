@@ -1,0 +1,7 @@
+,
+    "evancz/start-app": "2.0.2"
+
+
+
+
+        "evancz/start-app": "2.0.2 <= v < 3.0.0"

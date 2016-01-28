@@ -141,6 +141,16 @@ moreJSONWithInterfaces = """
 }
 """
 
+demo = """
+{
+  "Hostname": "server01",
+  "Nicknames": [ "foo", "bar" ],  
+  "Interfaces": [
+    {"Name": "eth0", "MAC": "00:11:22:33:44:55", "IPs": ["10.1.1.1", "10.1.2.2"]}
+  ]
+}
+"""
+
 moreJSON = """
 {
   "Hostname": "server01",
@@ -159,7 +169,7 @@ moreJSON = """
 
 getValues : Data
 getValues =
-  let parsed =  Js.decodeString (decoder ()) moreJSON
+  let parsed =  Js.decodeString (decoder ()) demo
   in
   case parsed of
     Ok value ->  value

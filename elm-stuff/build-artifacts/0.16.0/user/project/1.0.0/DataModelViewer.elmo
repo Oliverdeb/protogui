@@ -34,7 +34,7 @@ Elm.DataModelViewer.make = function (_elm) {
             return _p1._0;
          } else {
             return _U.crashCase("DataModelViewer",
-            {start: {line: 412,column: 15},end: {line: 414,column: 38}},
+            {start: {line: 414,column: 15},end: {line: 416,column: 38}},
             _p1)("Very bad");
          }
    };
@@ -44,7 +44,7 @@ Elm.DataModelViewer.make = function (_elm) {
             return _p3._0;
          } else {
             return _U.crashCase("DataModelViewer",
-            {start: {line: 384,column: 14},end: {line: 386,column: 74}},
+            {start: {line: 386,column: 14},end: {line: 388,column: 74}},
             _p3)("Error: fromJust nothing (empty JSON string?)");
          }
    };

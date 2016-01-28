@@ -11400,6 +11400,7 @@ Elm.StructureDecoder.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var demoJSON = "\n{\n     \"root\": \"Server\",\n     \"dataTypes\": [\n         {\n             \"name\": \"Server\",\n             \"fields\": [\n                 {\"name\": \"Hostname\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"Nicknames\", \"kind\": \"String\", \"repeated\": true},\n                 {\"name\": \"Interfaces\", \"kind\": \"Interface\", \"repeated\": true}                 \n             ]\n         },\n\n         {\n             \"name\": \"Interface\",\n             \"fields\": [\n                 {\"name\": \"Name\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"MAC\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"IPs\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         }\n     ]\n}\n";
    var jsonString = "\n{\n     \"root\": \"Server\",\n     \"dataTypes\": [\n         {\n             \"name\": \"Server\",\n             \"fields\": [\n                 {\"name\": \"Hostname\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"Nicknames\", \"kind\": \"String\", \"repeated\": true},\n                 {\"name\": \"Interfaces\", \"kind\": \"Interface\", \"repeated\": true},\n                 {\"name\": \"SubThing\", \"kind\": \"SubServer\", \"repeated\": false}\n             ]\n         },\n\n         {\n             \"name\": \"Interface\",\n             \"fields\": [\n                 {\"name\": \"Name\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"MAC\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"IPs\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         },\n\n         {\n             \"name\": \"SubServer\",\n             \"fields\": [\n                 {\"name\": \"SubName\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"SubNicks\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         }\n     ]\n}\n";
    var apply = $Json$Decode.object2(F2(function (x,y) {
       return x(y);
@@ -11442,7 +11443,7 @@ Elm.StructureDecoder.make = function (_elm) {
    var getModel = function () {
       var _p0 = A2($Json$Decode.decodeString,
       dataModelDecoder,
-      jsonString);
+      demoJSON);
       if (_p0.ctor === "Ok") {
             return setModel(_p0._0);
          } else {
@@ -11496,6 +11497,7 @@ Elm.ValueParser.make = function (_elm) {
          }
    };
    var moreJSON = "\n{\n  \"Hostname\": \"server01\",\n  \"Nicknames\": [ \"foo\", \"bar\" ],\n  \"SubThing\": { \"SubName\": \"subby\", \"SubNicks\": [\"awesome\", \"cool\"] },\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]},\n    {\"Name\": \"eth1\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
+   var demo = "\n{\n  \"Hostname\": \"server01\",\n  \"Nicknames\": [ \"foo\", \"bar\" ],  \n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
    var moreJSONWithInterfaces = "\n{\n  \"Hostname\": \"server01\",\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
    var someJson = "\n{\"a\":[1,2,3], \"b\" : 3}\n";
    var isNull = function (x) {
@@ -11558,7 +11560,7 @@ Elm.ValueParser.make = function (_elm) {
    var getValues = function () {
       var parsed = A2($Json$Decode.decodeString,
       decoder({ctor: "_Tuple0"}),
-      moreJSON);
+      demo);
       var _p12 = parsed;
       if (_p12.ctor === "Ok") {
             return _p12._0;
@@ -11614,7 +11616,7 @@ Elm.DataModelViewer.make = function (_elm) {
             return _p1._0;
          } else {
             return _U.crashCase("DataModelViewer",
-            {start: {line: 412,column: 15},end: {line: 414,column: 38}},
+            {start: {line: 414,column: 15},end: {line: 416,column: 38}},
             _p1)("Very bad");
          }
    };
@@ -11624,7 +11626,7 @@ Elm.DataModelViewer.make = function (_elm) {
             return _p3._0;
          } else {
             return _U.crashCase("DataModelViewer",
-            {start: {line: 384,column: 14},end: {line: 386,column: 74}},
+            {start: {line: 386,column: 14},end: {line: 388,column: 74}},
             _p3)("Error: fromJust nothing (empty JSON string?)");
          }
    };

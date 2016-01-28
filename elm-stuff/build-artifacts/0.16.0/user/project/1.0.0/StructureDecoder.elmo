@@ -13,6 +13,7 @@ Elm.StructureDecoder.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var demoJSON = "\n{\n     \"root\": \"Server\",\n     \"dataTypes\": [\n         {\n             \"name\": \"Server\",\n             \"fields\": [\n                 {\"name\": \"Hostname\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"Nicknames\", \"kind\": \"String\", \"repeated\": true},\n                 {\"name\": \"Interfaces\", \"kind\": \"Interface\", \"repeated\": true}                 \n             ]\n         },\n\n         {\n             \"name\": \"Interface\",\n             \"fields\": [\n                 {\"name\": \"Name\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"MAC\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"IPs\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         }\n     ]\n}\n";
    var jsonString = "\n{\n     \"root\": \"Server\",\n     \"dataTypes\": [\n         {\n             \"name\": \"Server\",\n             \"fields\": [\n                 {\"name\": \"Hostname\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"Nicknames\", \"kind\": \"String\", \"repeated\": true},\n                 {\"name\": \"Interfaces\", \"kind\": \"Interface\", \"repeated\": true},\n                 {\"name\": \"SubThing\", \"kind\": \"SubServer\", \"repeated\": false}\n             ]\n         },\n\n         {\n             \"name\": \"Interface\",\n             \"fields\": [\n                 {\"name\": \"Name\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"MAC\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"IPs\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         },\n\n         {\n             \"name\": \"SubServer\",\n             \"fields\": [\n                 {\"name\": \"SubName\", \"kind\": \"String\", \"repeated\": false},\n                 {\"name\": \"SubNicks\", \"kind\": \"String\", \"repeated\": true}\n             ]\n         }\n     ]\n}\n";
    var apply = $Json$Decode.object2(F2(function (x,y) {
       return x(y);
@@ -55,7 +56,7 @@ Elm.StructureDecoder.make = function (_elm) {
    var getModel = function () {
       var _p0 = A2($Json$Decode.decodeString,
       dataModelDecoder,
-      jsonString);
+      demoJSON);
       if (_p0.ctor === "Ok") {
             return setModel(_p0._0);
          } else {

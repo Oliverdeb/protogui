@@ -370,7 +370,9 @@ displaySingleBasicType address field parentpath shouldDisplay data =
             _ -> div [] [ text "huh2" ]
 
 repeatedString : Address Action -> FieldPath -> Int -> Data -> Html
-repeatedString address fieldpath index data = div [] [input [ value (dataToString data), on "input" targetValue ( Signal.message address << (UpdateFieldValue (fieldpath ++ [FieldIndex index]))) ] [] , button [ onClick address (RemoveField (fieldpath ++ [FieldIndex index])) ]  [ text "Remove" ] ]
+repeatedString address fieldpath index data = div [] [input [ value (dataToString data)
+                                                                , on "input" targetValue ( Signal.message address << (UpdateFieldValue (fieldpath ++ [FieldIndex index]))) ] [] 
+                                                                , button [ onClick address (RemoveField (fieldpath ++ [FieldIndex index])) ]  [ text "Remove" ] ]
 
 singleString : Address Action -> FieldPath -> Data -> Html
 singleString address fieldpath data = div [] [input [ value (dataToString data) , (on "input" targetValue ( Signal.message address << (UpdateFieldValue fieldpath))) ] [] ]

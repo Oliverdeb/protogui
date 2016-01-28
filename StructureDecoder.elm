@@ -100,9 +100,34 @@ jsonString = """
 }
 """
 
+demoJSON = """
+{
+     "root": "Server",
+     "dataTypes": [
+         {
+             "name": "Server",
+             "fields": [
+                 {"name": "Hostname", "kind": "String", "repeated": false},
+                 {"name": "Nicknames", "kind": "String", "repeated": true},
+                 {"name": "Interfaces", "kind": "Interface", "repeated": true}                 
+             ]
+         },
+
+         {
+             "name": "Interface",
+             "fields": [
+                 {"name": "Name", "kind": "String", "repeated": false},
+                 {"name": "MAC", "kind": "String", "repeated": false},
+                 {"name": "IPs", "kind": "String", "repeated": true}
+             ]
+         }
+     ]
+}
+"""
+
 getModel : DataModel
 getModel =
-    case (decodeString dataModelDecoder jsonString) of
+    case (decodeString dataModelDecoder demoJSON) of
         Ok value ->  setModel value
         Err msg  ->  setModel emptyModel
 

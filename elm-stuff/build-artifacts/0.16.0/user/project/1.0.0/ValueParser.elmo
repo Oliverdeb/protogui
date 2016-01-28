@@ -39,6 +39,7 @@ Elm.ValueParser.make = function (_elm) {
          }
    };
    var moreJSON = "\n{\n  \"Hostname\": \"server01\",\n  \"Nicknames\": [ \"foo\", \"bar\" ],\n  \"SubThing\": { \"SubName\": \"subby\", \"SubNicks\": [\"awesome\", \"cool\"] },\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]},\n    {\"Name\": \"eth1\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
+   var demo = "\n{\n  \"Hostname\": \"server01\",\n  \"Nicknames\": [ \"foo\", \"bar\" ],  \n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
    var moreJSONWithInterfaces = "\n{\n  \"Hostname\": \"server01\",\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
    var someJson = "\n{\"a\":[1,2,3], \"b\" : 3}\n";
    var isNull = function (x) {
@@ -101,7 +102,7 @@ Elm.ValueParser.make = function (_elm) {
    var getValues = function () {
       var parsed = A2($Json$Decode.decodeString,
       decoder({ctor: "_Tuple0"}),
-      moreJSON);
+      demo);
       var _p12 = parsed;
       if (_p12.ctor === "Ok") {
             return _p12._0;
