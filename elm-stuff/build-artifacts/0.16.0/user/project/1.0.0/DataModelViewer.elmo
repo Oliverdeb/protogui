@@ -1,0 +1,762 @@
+Elm.DataModelViewer = Elm.DataModelViewer || {};
+Elm.DataModelViewer.make = function (_elm) {
+   "use strict";
+   _elm.DataModelViewer = _elm.DataModelViewer || {};
+   if (_elm.DataModelViewer.values)
+   return _elm.DataModelViewer.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $StructureDecoder = Elm.StructureDecoder.make(_elm),
+   $ValueParser = Elm.ValueParser.make(_elm);
+   var _op = {};
+   var newBasicDataType = function (kind) {
+      var _p0 = kind;
+      if (_p0 === "String") {
+            return $ValueParser.newString("");
+         } else {
+            return $ValueParser.newString("");
+         }
+   };
+   var mustToInt = function (s) {
+      var _p1 = $String.toInt(s);
+      if (_p1.ctor === "Ok") {
+            return _p1._0;
+         } else {
+            return _U.crashCase("DataModelViewer",
+            {start: {line: 412,column: 15},end: {line: 414,column: 38}},
+            _p1)("Very bad");
+         }
+   };
+   var fromJust = function (x) {
+      var _p3 = x;
+      if (_p3.ctor === "Just") {
+            return _p3._0;
+         } else {
+            return _U.crashCase("DataModelViewer",
+            {start: {line: 384,column: 14},end: {line: 386,column: 74}},
+            _p3)("Error: fromJust nothing (empty JSON string?)");
+         }
+   };
+   var getDataType = F2(function (model,kind) {
+      var x = fromJust($List.head(A2($List.filter,
+      function (datatype) {
+         return _U.eq(datatype.name,kind);
+      },
+      model.dataTypes)));
+      return x;
+   });
+   var getField = F2(function (datatype,fieldname) {
+      var isField = function (field) {
+         return _U.eq(field.name,fieldname);
+      };
+      var firstHit = F2(function (fn,xs) {
+         return fromJust($List.head(A2($List.filter,fn,xs)));
+      });
+      return A2(firstHit,isField,datatype.fields);
+   });
+   var getDataTypeForField = F3(function (model,kind,fieldname) {
+      var datatype = A2(getDataType,model,kind);
+      return A2(getDataType,
+      model,
+      A2(getField,datatype,fieldname).kind);
+   });
+   var isJust = function (x) {
+      var _p5 = x;
+      if (_p5.ctor === "Just") {
+            return true;
+         } else {
+            return false;
+         }
+   };
+   var nthEl = F2(function (xs,n) {
+      return fromJust(A2($Array.get,n,$Array.fromList(xs)));
+   });
+   var thirdEl = function (xs) {    return A2(nthEl,xs,3);};
+   var secondEl = function (xs) {    return A2(nthEl,xs,2);};
+   var addFieldFn = F2(function (kind,maybeData) {
+      var data = fromJust(maybeData);
+      var list = $ValueParser.dataToList(data);
+      var _p6 = kind;
+      if (_p6 === "String") {
+            return $Maybe.Just($ValueParser.newList(A2($Basics._op["++"],
+            list,
+            _U.list([$ValueParser.newString("")]))));
+         } else {
+            return maybeData;
+         }
+   });
+   var updateIfN = F4(function (index,replace,old,$new) {
+      return _U.eq(index,replace) ? $new : old;
+   });
+   var updateFieldFn = F3(function (kind,value,maybeData) {
+      var _p7 = kind;
+      if (_p7 === "String") {
+            return $Maybe.Just($ValueParser.newString(value));
+         } else {
+            return maybeData;
+         }
+   });
+   var removeFieldFn = function (_p8) {
+      return $Maybe.Just($ValueParser.newNull);
+   };
+   var updateList = F3(function (xs,target,fn) {
+      var updateIf = function (_p9) {
+         var _p10 = _p9;
+         var _p11 = _p10._1;
+         return _U.eq(_p10._0,
+         target) ? fromJust(fn($Maybe.Just(_p11))) : _p11;
+      };
+      var indexed = A2($List.indexedMap,
+      F2(function (v0,v1) {
+         return {ctor: "_Tuple2",_0: v0,_1: v1};
+      }),
+      xs);
+      return $Maybe.Just($ValueParser.newList(A2($List.map,
+      updateIf,
+      indexed)));
+   });
+   var newField = function (kind$) {
+      return {name: "New field",kind: kind$,repeated: false};
+   };
+   var basicTypes = _U.list(["String","Int"]);
+   var newDataType = F2(function (model,kind) {
+      var datatype = A2(getDataType,model,kind);
+      var fields = A2($List.filter,
+      function (field) {
+         return A2($List.member,field.kind,basicTypes);
+      },
+      datatype.fields);
+      var maplist = A2($List.map,
+      function (field) {
+         return {ctor: "_Tuple2"
+                ,_0: field.name
+                ,_1: newBasicDataType(field.kind)};
+      },
+      fields);
+      return $ValueParser.newDict($Dict.fromList(maplist));
+   });
+   var addTypeFn = F3(function (model,kind,maybeData) {
+      var data = fromJust(maybeData);
+      var list = $ValueParser.dataToList(data);
+      return $Maybe.Just($ValueParser.newList(A2($Basics._op["++"],
+      list,
+      _U.list([A2(newDataType,model,kind)]))));
+   });
+   var mustFieldIndex = function (segment) {
+      var _p12 = segment;
+      if (_p12.ctor === "FieldIndex") {
+            return _p12._0;
+         } else {
+            return -1;
+         }
+   };
+   var updateLeafList = F3(function (fieldpath,data,fn) {
+      var list = $ValueParser.dataToList(data);
+      var array = $Array.fromList(list);
+      var target = mustFieldIndex(fromJust($List.head(fieldpath)));
+      var newValue = fn(A2($Array.get,target,array));
+      var updatedArray = A3($Array.set,
+      target,
+      fromJust(newValue),
+      array);
+      var result = $Array.toList(updatedArray);
+      var nonNull = A2($List.filter,
+      function (x) {
+         return $Basics.not($ValueParser.isNull(x));
+      },
+      result);
+      return $Maybe.Just($ValueParser.newList(nonNull));
+   });
+   var mustFieldName = function (segment) {
+      var _p13 = segment;
+      if (_p13.ctor === "FieldName") {
+            return _p13._0;
+         } else {
+            return _U.crashCase("DataModelViewer",
+            {start: {line: 32,column: 5},end: {line: 34,column: 44}},
+            _p13)("not a field name");
+         }
+   };
+   var getLeafType = F3(function (model,datatype,fieldpath) {
+      getLeafType: while (true) {
+         var head = fromJust($List.head(fieldpath));
+         var fieldname = mustFieldName(head);
+         var field = A2(getField,datatype,fieldname);
+         if (A2($List.member,field.kind,basicTypes)) return field.kind;
+         else if (_U.eq($List.length(fieldpath),1)) return field.kind;
+            else if (field.repeated) {
+                     var _v9 = model,
+                     _v10 = A2(getDataType,model,field.kind),
+                     _v11 = A2($List.drop,2,fieldpath);
+                     model = _v9;
+                     datatype = _v10;
+                     fieldpath = _v11;
+                     continue getLeafType;
+                  } else {
+                     var _v12 = model,
+                     _v13 = A2(getDataType,model,field.kind),
+                     _v14 = A2($List.drop,1,fieldpath);
+                     model = _v12;
+                     datatype = _v13;
+                     fieldpath = _v14;
+                     continue getLeafType;
+                  }
+      }
+   });
+   var updateLeafSingle = F5(function (model,
+   datatype,
+   fieldpath,
+   data,
+   fn) {
+      var fieldname = mustFieldName(fromJust($List.head(fieldpath)));
+      var field = A2(getField,datatype,fieldname);
+      return field.repeated ? fn($Maybe.Just(data)) : fn(A2($Dict.get,
+      fieldname,
+      $ValueParser.dataToDict(data)));
+   });
+   var updateTree = F5(function (model,
+   datatype,
+   fieldpath,
+   data,
+   fn) {
+      var fieldpathtail = fromJust($List.tail(fieldpath));
+      var dict = $ValueParser.dataToDict(data);
+      var fieldname = mustFieldName(fromJust($List.head(fieldpath)));
+      var isRepeated = A2(getField,datatype,fieldname).repeated;
+      var fielddata = fromJust(A2($Dict.get,fieldname,dict));
+      return isRepeated ? _U.eq($List.length(fieldpathtail),
+      1) ? $Maybe.Just($ValueParser.newDict(A3($Dict.update,
+      fieldname,
+      function (fielddata) {
+         return A3(updateLeafList,
+         fieldpathtail,
+         fromJust(fielddata),
+         fn);
+      },
+      dict))) : $Maybe.Just($ValueParser.newDict(A3($Dict.update,
+      fieldname,
+      function (fielddata) {
+         return A6(updateTreeList,
+         fieldname,
+         model,
+         datatype,
+         fieldpathtail,
+         fromJust(fielddata),
+         fn);
+      },
+      dict))) : A6(updateTreeDict,
+      fieldname,
+      model,
+      datatype,
+      fieldpath,
+      fielddata,
+      fn);
+   });
+   var updateTreeDict = F6(function (fieldname,
+   model,
+   datatype,
+   fieldpath,
+   data,
+   fn) {
+      var dict = $ValueParser.dataToDict(data);
+      var field = A2(getField,datatype,fieldname);
+      var childtype = A2(getDataType,model,field.kind);
+      var result = A3($Dict.update,
+      fieldname,
+      function (child) {
+         return A5(updateAt,
+         model,
+         childtype,
+         fromJust($List.tail(fieldpath)),
+         fromJust(child),
+         fn);
+      },
+      dict);
+      return $Maybe.Just($ValueParser.newDict(result));
+   });
+   var updateAt = F5(function (model,datatype,fieldpath,data,fn) {
+      var fieldpathtail = fromJust($List.tail(fieldpath));
+      var dict = $ValueParser.dataToDict(data);
+      var fieldname = mustFieldName(fromJust($List.head(fieldpath)));
+      var isRepeated = A2(getField,datatype,fieldname).repeated;
+      var fielddata = fromJust(A2($Dict.get,fieldname,dict));
+      return _U.eq($List.length(fieldpath),
+      1) ? $Maybe.Just($ValueParser.newDict(A3($Dict.update,
+      fieldname,
+      function (fielddata) {
+         return A5(updateLeafSingle,
+         model,
+         datatype,
+         fieldpath,
+         fromJust(fielddata),
+         fn);
+      },
+      dict))) : A5(updateTree,model,datatype,fieldpath,data,fn);
+   });
+   var updateTreeList = F6(function (fieldname,
+   model,
+   datatype,
+   fieldpath,
+   data,
+   fn) {
+      var target = mustFieldIndex(fromJust($List.head(fieldpath)));
+      var list = $ValueParser.dataToList(data);
+      var array = $Array.fromList(list);
+      var field = A2(getField,datatype,fieldname);
+      var childtype = A2(getDataType,model,field.kind);
+      var updatedArray = A3($Array.set,
+      target,
+      fromJust(A5(updateAt,
+      model,
+      childtype,
+      fromJust($List.tail(fieldpath)),
+      fromJust(A2($Array.get,target,array)),
+      fn)),
+      array);
+      var result = $Array.toList(updatedArray);
+      return $Maybe.Just($ValueParser.newList(result));
+   });
+   var removeField = F3(function (model,fieldpath,maybeData) {
+      var datatype = A2(getDataType,model,model.root);
+      var leafType = A3(getLeafType,model,datatype,fieldpath);
+      var data = fromJust(maybeData);
+      return A5(updateAt,model,datatype,fieldpath,data,removeFieldFn);
+   });
+   var updateField = F4(function (model,
+   fieldpath,
+   value,
+   maybeData) {
+      var datatype = A2(getDataType,model,model.root);
+      var leafType = A3(getLeafType,model,datatype,fieldpath);
+      var data = fromJust(maybeData);
+      return A5(updateAt,
+      model,
+      datatype,
+      fieldpath,
+      data,
+      A2(updateFieldFn,leafType,value));
+   });
+   var addField = F3(function (model,fieldpath,maybeData) {
+      var datatype = A2(getDataType,model,model.root);
+      var leafType = A3(getLeafType,model,datatype,fieldpath);
+      var data = fromJust(maybeData);
+      return A5(updateAt,
+      model,
+      datatype,
+      fieldpath,
+      data,
+      addFieldFn(leafType));
+   });
+   var addType = F4(function (model,fieldpath,kind,maybeData) {
+      var datatype = A2(getDataType,model,model.root);
+      var leafType = A3(getLeafType,model,datatype,fieldpath);
+      var data = fromJust(maybeData);
+      return A5(updateAt,
+      model,
+      datatype,
+      fieldpath,
+      data,
+      A2(addTypeFn,model,leafType));
+   });
+   var update = F2(function (action,model) {
+      var _p15 = action;
+      switch (_p15.ctor)
+      {case "NoOp": return model;
+         case "AddField": return _U.update(model,
+           {values: fromJust(A3(addField,
+           model.datamodel,
+           _p15._0,
+           $Maybe.Just(model.values)))});
+         case "AddType": return _U.update(model,
+           {values: fromJust(A4(addType,
+           model.datamodel,
+           _p15._0,
+           model.datamodel.root,
+           $Maybe.Just(model.values)))});
+         case "RemoveField": return _U.update(model,
+           {values: fromJust(A3(removeField,
+           model.datamodel,
+           _p15._0,
+           $Maybe.Just(model.values)))});
+         default: return _U.update(model,
+           {values: fromJust(A4(updateField,
+           model.datamodel,
+           _p15._0,
+           _p15._1,
+           $Maybe.Just(model.values)))});}
+   });
+   var FieldName = function (a) {
+      return {ctor: "FieldName",_0: a};
+   };
+   var FieldIndex = function (a) {
+      return {ctor: "FieldIndex",_0: a};
+   };
+   var Model = F2(function (a,b) {
+      return {datamodel: a,values: b};
+   });
+   var UpdateFieldValue = F2(function (a,b) {
+      return {ctor: "UpdateFieldValue",_0: a,_1: b};
+   });
+   var singleString = F3(function (address,fieldpath,data) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+      _U.list([$Html$Attributes.value($ValueParser.dataToString(data))
+              ,A3($Html$Events.on,
+              "input",
+              $Html$Events.targetValue,
+              function (_p16) {
+                 return A2($Signal.message,
+                 address,
+                 A2(UpdateFieldValue,fieldpath,_p16));
+              })]),
+      _U.list([]))]));
+   });
+   var displaySingleBasicType = F5(function (address,
+   field,
+   parentpath,
+   shouldDisplay,
+   data) {
+      if (shouldDisplay) {
+            var _p17 = field.kind;
+            if (_p17 === "String") {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([A2($Html.span,
+                          _U.list([]),
+                          _U.list([$Html.text(field.name)]))
+                          ,A3(singleString,
+                          address,
+                          A2($Basics._op["++"],
+                          parentpath,
+                          _U.list([FieldName(field.name)])),
+                          fromJust(data))]));
+               } else {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([$Html.text("huh2")]));
+               }
+         } else {
+            var _p18 = field.kind;
+            if (_p18 === "String") {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([A2($Html.span,
+                          _U.list([]),
+                          _U.list([$Html.text(field.name)]))
+                          ,A3(singleString,
+                          address,
+                          A2($Basics._op["++"],
+                          parentpath,
+                          _U.list([FieldName(field.name)])),
+                          $ValueParser.newString(""))]));
+               } else {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([$Html.text("huh2")]));
+               }
+         }
+   });
+   var RemoveField = function (a) {
+      return {ctor: "RemoveField",_0: a};
+   };
+   var repeatedString = F4(function (address,
+   fieldpath,
+   index,
+   data) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.value($ValueParser.dataToString(data))
+                      ,A3($Html$Events.on,
+                      "input",
+                      $Html$Events.targetValue,
+                      function (_p19) {
+                         return A2($Signal.message,
+                         address,
+                         A2(UpdateFieldValue,
+                         A2($Basics._op["++"],fieldpath,_U.list([FieldIndex(index)])),
+                         _p19));
+                      })]),
+              _U.list([]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,
+              address,
+              RemoveField(A2($Basics._op["++"],
+              fieldpath,
+              _U.list([FieldIndex(index)]))))]),
+              _U.list([$Html.text("Remove")]))]));
+   });
+   var AddType = function (a) {
+      return {ctor: "AddType",_0: a};
+   };
+   var AddField = function (a) {
+      return {ctor: "AddField",_0: a};
+   };
+   var displayRepeatedBasicType = F5(function (address,
+   field,
+   parentpath,
+   shouldDisplay,
+   data) {
+      if (shouldDisplay) {
+            var _p20 = field.kind;
+            if (_p20 === "String") {
+                  return A2($Html.div,
+                  _U.list([]),
+                  A2($Basics._op["++"],
+                  _U.list([A2($Html.span,
+                  _U.list([]),
+                  _U.list([$Html.text(field.name)]))]),
+                  A2($Basics._op["++"],
+                  A2($List.indexedMap,
+                  A2(repeatedString,
+                  address,
+                  A2($Basics._op["++"],
+                  parentpath,
+                  _U.list([FieldName(field.name)]))),
+                  $ValueParser.dataToList(fromJust(data))),
+                  _U.list([A2($Html.button,
+                  _U.list([A2($Html$Events.onClick,
+                  address,
+                  AddField(A2($Basics._op["++"],
+                  parentpath,
+                  _U.list([FieldName(field.name)]))))]),
+                  _U.list([$Html.text(A2($Basics._op["++"],
+                  "Add ",
+                  field.name))]))]))));
+               } else {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([$Html.text("huh1")]));
+               }
+         } else {
+            var _p21 = field.kind;
+            if (_p21 === "String") {
+                  return A2($Html.div,
+                  _U.list([]),
+                  A2($Basics._op["++"],
+                  _U.list([A2($Html.span,
+                  _U.list([]),
+                  _U.list([$Html.text(field.name)]))]),
+                  _U.list([A2($Html.button,
+                  _U.list([A2($Html$Events.onClick,
+                  address,
+                  AddField(A2($Basics._op["++"],
+                  parentpath,
+                  _U.list([FieldName(field.name)]))))]),
+                  _U.list([$Html.text(A2($Basics._op["++"],
+                  "Add ",
+                  field.name))]))])));
+               } else {
+                  return A2($Html.div,
+                  _U.list([]),
+                  _U.list([$Html.text("huh1")]));
+               }
+         }
+   });
+   var displayField = F5(function (address,
+   datamodel,
+   data,
+   parentpath,
+   field) {
+      var dataDict = $ValueParser.dataToDict(data);
+      var encoded = A2($Dict.get,field.name,dataDict);
+      var shouldDisplay = isJust(encoded);
+      return A2($List.member,
+      field.kind,
+      basicTypes) ? field.repeated ? A5(displayRepeatedBasicType,
+      address,
+      field,
+      parentpath,
+      shouldDisplay,
+      encoded) : A5(displaySingleBasicType,
+      address,
+      field,
+      parentpath,
+      shouldDisplay,
+      encoded) : field.repeated ? A6(displayRepeatedStruct,
+      address,
+      field,
+      datamodel,
+      parentpath,
+      shouldDisplay,
+      encoded) : A6(displaySingleStruct,
+      address,
+      field,
+      datamodel,
+      parentpath,
+      shouldDisplay,
+      encoded);
+   });
+   var displayRepeatedStruct = F6(function (address,
+   field,
+   datamodel,
+   parentpath,
+   shouldDisplay,
+   data) {
+      return shouldDisplay ? A2($Html.div,
+      _U.list([]),
+      A2($Basics._op["++"],
+      A2($List.indexedMap,
+      F2(function (index,value) {
+         return A5(displayDataType,
+         address,
+         datamodel,
+         A2(getDataType,datamodel,field.kind),
+         A2($Basics._op["++"],
+         parentpath,
+         A2($Basics._op["++"],
+         _U.list([FieldName(field.name)]),
+         _U.list([FieldIndex(index)]))),
+         value);
+      }),
+      $ValueParser.dataToList(fromJust(data))),
+      _U.list([A2($Html.button,
+      _U.list([A2($Html$Events.onClick,
+      address,
+      AddType(A2($Basics._op["++"],
+      parentpath,
+      _U.list([FieldName(field.name)]))))]),
+      _U.list([$Html.text(A2($Basics._op["++"],
+      "Add ",
+      field.name))]))]))) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.button,
+      _U.list([A2($Html$Events.onClick,
+      address,
+      AddType(A2($Basics._op["++"],
+      parentpath,
+      _U.list([FieldName(field.name)]))))]),
+      _U.list([$Html.text(A2($Basics._op["++"],
+      "Add ",
+      field.name))]))]));
+   });
+   var displayDataType = F5(function (address,
+   datamodel,
+   datatype,
+   parentpath,
+   data) {
+      var heading = _U.list([A2($Html.h1,
+      _U.list([]),
+      _U.list([$Html.text(datatype.name)]))]);
+      return A2($Html.div,
+      _U.list([]),
+      A2($Basics._op["++"],
+      heading,
+      A5(displayFields,address,datamodel,datatype,data,parentpath)));
+   });
+   var displayFields = F5(function (address,
+   datamodel,
+   datatype,
+   data,
+   parentpath) {
+      return A2($List.map,
+      A4(displayField,address,datamodel,data,parentpath),
+      datatype.fields);
+   });
+   var displaySingleStruct = F6(function (address,
+   field,
+   datamodel,
+   parentpath,
+   shouldDisplay,
+   data) {
+      var datatype = A2(getDataType,datamodel,field.kind);
+      return shouldDisplay ? A5(displayDataType,
+      address,
+      datamodel,
+      datatype,
+      A2($Basics._op["++"],
+      parentpath,
+      _U.list([FieldName(field.name)])),
+      fromJust(data)) : A2($Html.div,
+      _U.list([]),
+      A2($Basics._op["++"],
+      _U.list([A2($Html.span,
+      _U.list([]),
+      _U.list([$Html.text(field.name)]))]),
+      _U.list([A2($Html.button,
+      _U.list([A2($Html$Events.onClick,
+      address,
+      AddType(A2($Basics._op["++"],
+      parentpath,
+      _U.list([FieldName(field.name)]))))]),
+      _U.list([$Html.text(A2($Basics._op["++"],
+      "Set ",
+      field.name))]))])));
+   });
+   var view = F2(function (address,model) {
+      var rootType = A2(getDataType,
+      model.datamodel,
+      model.datamodel.root);
+      return A5(displayDataType,
+      address,
+      model.datamodel,
+      rootType,
+      _U.list([]),
+      model.values);
+   });
+   var NoOp = {ctor: "NoOp"};
+   return _elm.DataModelViewer.values = {_op: _op
+                                        ,NoOp: NoOp
+                                        ,AddField: AddField
+                                        ,AddType: AddType
+                                        ,RemoveField: RemoveField
+                                        ,UpdateFieldValue: UpdateFieldValue
+                                        ,Model: Model
+                                        ,FieldIndex: FieldIndex
+                                        ,FieldName: FieldName
+                                        ,mustFieldName: mustFieldName
+                                        ,mustFieldIndex: mustFieldIndex
+                                        ,basicTypes: basicTypes
+                                        ,newField: newField
+                                        ,update: update
+                                        ,getLeafType: getLeafType
+                                        ,updateAt: updateAt
+                                        ,updateLeafSingle: updateLeafSingle
+                                        ,updateLeafList: updateLeafList
+                                        ,updateList: updateList
+                                        ,updateTree: updateTree
+                                        ,updateTreeList: updateTreeList
+                                        ,updateTreeDict: updateTreeDict
+                                        ,removeField: removeField
+                                        ,removeFieldFn: removeFieldFn
+                                        ,updateField: updateField
+                                        ,updateFieldFn: updateFieldFn
+                                        ,updateIfN: updateIfN
+                                        ,addField: addField
+                                        ,addFieldFn: addFieldFn
+                                        ,addType: addType
+                                        ,addTypeFn: addTypeFn
+                                        ,secondEl: secondEl
+                                        ,thirdEl: thirdEl
+                                        ,nthEl: nthEl
+                                        ,view: view
+                                        ,displayDataType: displayDataType
+                                        ,displayFields: displayFields
+                                        ,displayField: displayField
+                                        ,displayRepeatedStruct: displayRepeatedStruct
+                                        ,displaySingleStruct: displaySingleStruct
+                                        ,displayRepeatedBasicType: displayRepeatedBasicType
+                                        ,displaySingleBasicType: displaySingleBasicType
+                                        ,repeatedString: repeatedString
+                                        ,singleString: singleString
+                                        ,isJust: isJust
+                                        ,fromJust: fromJust
+                                        ,getDataType: getDataType
+                                        ,getDataTypeForField: getDataTypeForField
+                                        ,getField: getField
+                                        ,mustToInt: mustToInt
+                                        ,newDataType: newDataType
+                                        ,newBasicDataType: newBasicDataType};
+};

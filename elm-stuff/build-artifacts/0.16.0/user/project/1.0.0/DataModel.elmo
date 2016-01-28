@@ -21,7 +21,7 @@ Elm.DataModel.make = function (_elm) {
             return _p0._0;
          } else {
             return _U.crashCase("DataModel",
-            {start: {line: 86,column: 14},end: {line: 88,column: 74}},
+            {start: {line: 98,column: 14},end: {line: 100,column: 74}},
             _p0)("Error: fromJust nothing (empty JSON string?)");
          }
    };
@@ -30,13 +30,14 @@ Elm.DataModel.make = function (_elm) {
       function (datatype) {
          return _U.eq(datatype.name,kind);
       },
-      model.dataTypes))).fields;
+      model.dataTypes)));
    });
    var update = F2(function (action,model) {
       var _p2 = action;
       switch (_p2.ctor)
       {case "NoOp": return model;
          case "AddField": return model;
+         case "AddType": return model;
          case "RemoveField": return model;
          default: return model;}
    });
@@ -44,6 +45,9 @@ Elm.DataModel.make = function (_elm) {
       return {name: "New field",kind: kind$,repeated: false};
    };
    var basicTypes = _U.list(["String","Int"]);
+   var AddType = function (a) {
+      return {ctor: "AddType",_0: a};
+   };
    var ModifyField = F2(function (a,b) {
       return {ctor: "ModifyField",_0: a,_1: b};
    });
@@ -65,11 +69,25 @@ Elm.DataModel.make = function (_elm) {
               _U.list([A2($Html$Events.onClick,
               address,
               AddField(field.name))]),
-              _U.list([$Html.text("Add/ remove")]))])) : A2($Html.div,
+              _U.list([$Html.text(A2($Basics._op["++"],
+              "Add ",
+              field.name))]))])) : A2($Html.div,
       _U.list([]),
       _U.list([A2($Field.view,
       A2($Signal.forwardTo,address,ModifyField(field.name)),
-      field)])) : A2($Html.div,
+      field)])) : field.repeated ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Field.view,
+              A2($Signal.forwardTo,address,ModifyField(field.name)),
+              field)
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,AddType(field.kind))]),
+              _U.list([$Html.text(A2($Basics._op["++"],"Add ",field.kind))]))
+              ,A2($Html.div,
+              _U.list([]),
+              A2($List.map,
+              A2(displayField,address,model),
+              A2(getDataType,field.kind,model).fields))])) : A2($Html.div,
       _U.list([]),
       _U.list([A2($Field.view,
               A2($Signal.forwardTo,address,ModifyField(field.name)),
@@ -78,7 +96,7 @@ Elm.DataModel.make = function (_elm) {
               _U.list([]),
               A2($List.map,
               A2(displayField,address,model),
-              A2(getDataType,field.kind,model)))]));
+              A2(getDataType,field.kind,model).fields))]));
    });
    var checkDataType = F3(function (address,model,datatype) {
       return _U.eq(datatype.name,model.root) ? A2($Html.div,
@@ -103,6 +121,7 @@ Elm.DataModel.make = function (_elm) {
                                   ,AddField: AddField
                                   ,RemoveField: RemoveField
                                   ,ModifyField: ModifyField
+                                  ,AddType: AddType
                                   ,basicTypes: basicTypes
                                   ,newField: newField
                                   ,update: update

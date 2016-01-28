@@ -21,14 +21,11 @@ type alias Field = {
      , repeated : Bool
 }
 
-
-
-
 model : Model
 model = emptyModel
 
 emptyModel : DataModel
-emptyModel = 
+emptyModel =
     {
           dataTypes = []
         , root = ""
@@ -71,15 +68,18 @@ fieldDecoder =
 
 jsonString = """
 {
-     "root": "Server",    
+     "root": "Server",
      "dataTypes": [
          {
              "name": "Server",
              "fields": [
                  {"name": "Hostname", "kind": "String", "repeated": false},
-                 {"name": "Interfaces", "kind": "Interface", "repeated": true}
+                 {"name": "Nicknames", "kind": "String", "repeated": true},
+                 {"name": "Interfaces", "kind": "Interface", "repeated": true},
+                 {"name": "SubThing", "kind": "SubServer", "repeated": false}
              ]
          },
+
          {
              "name": "Interface",
              "fields": [
@@ -87,16 +87,24 @@ jsonString = """
                  {"name": "MAC", "kind": "String", "repeated": false},
                  {"name": "IPs", "kind": "String", "repeated": true}
              ]
+         },
+
+         {
+             "name": "SubServer",
+             "fields": [
+                 {"name": "SubName", "kind": "String", "repeated": false},
+                 {"name": "SubNicks", "kind": "String", "repeated": true}
+             ]
          }
      ]
 }
 """
 
 getModel : DataModel
-getModel = 
+getModel =
     case (decodeString dataModelDecoder jsonString) of
         Ok value ->  setModel value
-        Err msg  ->  setModel emptyModel 
+        Err msg  ->  setModel emptyModel
 
 setModel : DataModel -> DataModel
 setModel value =

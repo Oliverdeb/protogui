@@ -5,98 +5,49 @@ Elm.Main.make = function (_elm) {
    if (_elm.Main.values) return _elm.Main.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $DataModel = Elm.DataModel.make(_elm),
+   $DataModelViewer = Elm.DataModelViewer.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $StructureDecoder = Elm.StructureDecoder.make(_elm);
+   $StructureDecoder = Elm.StructureDecoder.make(_elm),
+   $ValueParser = Elm.ValueParser.make(_elm);
    var _op = {};
-   var initiallDataModel = {datamodel: $StructureDecoder.getModel
-                           ,id: 0};
-   var initialModel = {datamodels: _U.list([initiallDataModel])
-                      ,index: 1};
-   var newDataModel = function (index) {
-      return {datamodel: $StructureDecoder.getModel,id: index};
-   };
+   var initialDataModel = {datamodel: $StructureDecoder.getModel
+                          ,values: $ValueParser.getValues};
    var update = F2(function (action,model) {
       var _p0 = action;
-      switch (_p0.ctor)
-      {case "NoOp": return model;
-         case "AddModel": return _U.update(model,
-           {index: model.index + 1
-           ,datamodels: A2($Basics._op["++"],
-           model.datamodels,
-           _U.list([newDataModel(model.index)]))});
-         case "RemoveModel": var _p1 = _p0._0;
-           return !_U.eq(_p1,0) ? _U.update(model,
-           {datamodels: A2($List.filter,
-           function (datamodel) {
-              return !_U.eq(datamodel.id,_p1);
-           },
-           model.datamodels)}) : model;
-         default: return model;}
-   });
-   var Model = F2(function (a,b) {
-      return {datamodels: a,index: b};
-   });
-   var IndexedDataModel = F2(function (a,b) {
-      return {datamodel: a,id: b};
+      if (_p0.ctor === "NoOp") {
+            return model;
+         } else {
+            return A2($DataModelViewer.update,_p0._0,model);
+         }
    });
    var NoOp = {ctor: "NoOp"};
    var actions = $Signal.mailbox(NoOp);
    var model = A3($Signal.foldp,
    update,
-   initialModel,
+   initialDataModel,
    actions.signal);
-   var ModifyModel = F2(function (a,b) {
-      return {ctor: "ModifyModel",_0: a,_1: b};
-   });
-   var AddModel = {ctor: "AddModel"};
-   var RemoveModel = function (a) {
-      return {ctor: "RemoveModel",_0: a};
+   var ModifyModel = function (a) {
+      return {ctor: "ModifyModel",_0: a};
    };
-   var displayModel = F2(function (address,datamodel) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($DataModel.view,
-              A2($Signal.forwardTo,address,ModifyModel(datamodel.id)),
-              datamodel.datamodel)
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,AddModel)]),
-              _U.list([$Html.text(A2($Basics._op["++"],
-              "New ",
-              datamodel.datamodel.root))]))
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,
-              address,
-              RemoveModel(datamodel.id))]),
-              _U.list([$Html.text(A2($Basics._op["++"],
-              "Remove ",
-              datamodel.datamodel.root))]))]));
-   });
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([]),
-      A2($List.map,displayModel(address),model.datamodels));
+      _U.list([A2($DataModelViewer.view,
+      A2($Signal.forwardTo,address,ModifyModel),
+      model)]));
    });
    var main = A2($Signal.map,view(actions.address),model);
    return _elm.Main.values = {_op: _op
-                             ,RemoveModel: RemoveModel
-                             ,AddModel: AddModel
                              ,ModifyModel: ModifyModel
                              ,NoOp: NoOp
-                             ,IndexedDataModel: IndexedDataModel
-                             ,Model: Model
-                             ,newDataModel: newDataModel
                              ,update: update
                              ,view: view
-                             ,displayModel: displayModel
-                             ,initiallDataModel: initiallDataModel
-                             ,initialModel: initialModel
+                             ,initialDataModel: initialDataModel
                              ,model: model
                              ,actions: actions
                              ,main: main};

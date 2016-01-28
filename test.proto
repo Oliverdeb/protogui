@@ -1,0 +1,25 @@
+message Server { <- model.root ?
+	
+	repeated dataType datatypes = 1;
+
+
+	message dataTypes {
+		Server server = 1;
+		repeated Interface interfaces = 2;
+	}
+
+
+	message Server {
+		string hostname =1;
+		repeated string Nicknames = 2;
+		repeated Interface Interfaces = 3;		
+	}
+
+	message Interface {
+		string Name = 1;
+		string MAC = 2;
+		repeapted string IPs = 3;
+	}
+}
+
+

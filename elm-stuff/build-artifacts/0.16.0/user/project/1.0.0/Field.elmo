@@ -21,7 +21,7 @@ Elm.Field.make = function (_elm) {
               ,A2($Html.input,
               _U.list([$Html$Attributes.placeholder(A2($Basics._op["++"],
               "Enter ",
-              A2($Basics._op["++"],model.name,"here...")))]),
+              A2($Basics._op["++"],model.name," here...")))]),
               _U.list([]))]));
    });
    var update = F2(function (action,model) {

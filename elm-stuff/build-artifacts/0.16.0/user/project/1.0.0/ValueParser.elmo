@@ -1,0 +1,123 @@
+Elm.ValueParser = Elm.ValueParser || {};
+Elm.ValueParser.make = function (_elm) {
+   "use strict";
+   _elm.ValueParser = _elm.ValueParser || {};
+   if (_elm.ValueParser.values) return _elm.ValueParser.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var dataToString = function (data) {
+      var _p0 = data;
+      if (_p0.ctor === "String") {
+            return _p0._0;
+         } else {
+            return "";
+         }
+   };
+   var dataToList = function (data) {
+      var _p1 = data;
+      if (_p1.ctor === "Arr") {
+            return $Array.toList(_p1._0);
+         } else {
+            return _U.list([]);
+         }
+   };
+   var dataToDict = function (data) {
+      var _p2 = data;
+      if (_p2.ctor === "Object") {
+            return _p2._0;
+         } else {
+            return $Dict.empty;
+         }
+   };
+   var moreJSON = "\n{\n  \"Hostname\": \"server01\",\n  \"Nicknames\": [ \"foo\", \"bar\" ],\n  \"SubThing\": { \"SubName\": \"subby\", \"SubNicks\": [\"awesome\", \"cool\"] },\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]},\n    {\"Name\": \"eth1\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
+   var moreJSONWithInterfaces = "\n{\n  \"Hostname\": \"server01\",\n  \"Interfaces\": [\n    {\"Name\": \"eth0\", \"MAC\": \"00:11:22:33:44:55\", \"IPs\": [\"10.1.1.1\", \"10.1.2.2\"]}\n  ]\n}\n";
+   var someJson = "\n{\"a\":[1,2,3], \"b\" : 3}\n";
+   var isNull = function (x) {
+      var _p3 = x;
+      if (_p3.ctor === "Null") {
+            return true;
+         } else {
+            return false;
+         }
+   };
+   var Null = {ctor: "Null"};
+   var newNull = Null;
+   var $null = $Json$Decode.$null(Null);
+   var Bool = function (a) {    return {ctor: "Bool",_0: a};};
+   var bool = A2($Json$Decode.map,Bool,$Json$Decode.bool);
+   var Float = function (a) {    return {ctor: "Float",_0: a};};
+   var $float = A2($Json$Decode.map,Float,$Json$Decode.$float);
+   var Int = function (a) {    return {ctor: "Int",_0: a};};
+   var $int = A2($Json$Decode.map,Int,$Json$Decode.$int);
+   var String = function (a) {    return {ctor: "String",_0: a};};
+   var newString = function (s) {    return String(s);};
+   var string = A2($Json$Decode.map,String,$Json$Decode.string);
+   var Arr = function (a) {    return {ctor: "Arr",_0: a};};
+   var newArray = function (xs) {    return Arr(xs);};
+   var newList = function (xs) {
+      return Arr($Array.fromList(xs));
+   };
+   var Object = function (a) {    return {ctor: "Object",_0: a};};
+   var newDict = function (x) {    return Object(x);};
+   var object = function (_p4) {
+      var _p5 = _p4;
+      return A2($Json$Decode.andThen,
+      $Json$Decode.dict($Json$Decode.succeed(true)),
+      function (_p6) {
+         return A2($Json$Decode.map,
+         Object,
+         $Json$Decode.dict(decoder({ctor: "_Tuple0"})));
+      });
+   };
+   var decoder = function (_p7) {
+      var _p8 = _p7;
+      return $Json$Decode.oneOf(_U.list([object({ctor: "_Tuple0"})
+                                        ,array({ctor: "_Tuple0"})
+                                        ,string
+                                        ,$int
+                                        ,$float
+                                        ,bool
+                                        ,$null]));
+   };
+   var array = function (_p9) {
+      var _p10 = _p9;
+      return A2($Json$Decode.andThen,
+      $Json$Decode.array($Json$Decode.succeed(true)),
+      function (_p11) {
+         return A2($Json$Decode.map,
+         Arr,
+         $Json$Decode.array(decoder({ctor: "_Tuple0"})));
+      });
+   };
+   var getValues = function () {
+      var parsed = A2($Json$Decode.decodeString,
+      decoder({ctor: "_Tuple0"}),
+      moreJSON);
+      var _p12 = parsed;
+      if (_p12.ctor === "Ok") {
+            return _p12._0;
+         } else {
+            return Object($Dict.empty);
+         }
+   }();
+   return _elm.ValueParser.values = {_op: _op
+                                    ,getValues: getValues
+                                    ,dataToDict: dataToDict
+                                    ,dataToString: dataToString
+                                    ,dataToList: dataToList
+                                    ,newArray: newArray
+                                    ,newString: newString
+                                    ,newList: newList
+                                    ,newDict: newDict
+                                    ,isNull: isNull
+                                    ,newNull: newNull};
+};
