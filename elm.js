@@ -11443,7 +11443,7 @@ Elm.StructureDecoder.make = function (_elm) {
    var getModel = function () {
       var _p0 = A2($Json$Decode.decodeString,
       dataModelDecoder,
-      demoJSON);
+      jsonString);
       if (_p0.ctor === "Ok") {
             return setModel(_p0._0);
          } else {
@@ -11560,7 +11560,7 @@ Elm.ValueParser.make = function (_elm) {
    var getValues = function () {
       var parsed = A2($Json$Decode.decodeString,
       decoder({ctor: "_Tuple0"}),
-      demo);
+      moreJSON);
       var _p12 = parsed;
       if (_p12.ctor === "Ok") {
             return _p12._0;

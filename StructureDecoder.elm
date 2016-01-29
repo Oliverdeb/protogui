@@ -127,7 +127,7 @@ demoJSON = """
 
 getModel : DataModel
 getModel =
-    case (decodeString dataModelDecoder demoJSON) of
+    case (decodeString dataModelDecoder jsonString    ) of
         Ok value ->  setModel value
         Err msg  ->  setModel emptyModel
 

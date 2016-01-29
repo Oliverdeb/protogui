@@ -169,7 +169,7 @@ moreJSON = """
 
 getValues : Data
 getValues =
-  let parsed =  Js.decodeString (decoder ()) demo
+  let parsed =  Js.decodeString (decoder ()) moreJSON
   in
   case parsed of
     Ok value ->  value
@@ -192,43 +192,3 @@ dataToString data =
   case data of
     String str -> str
     _ -> ""
-
----- you would think this would work - but it complains you arent accounting for all the types that Data can be. Which is fair, but in this
----- case I KNOW i will only be passing in the Object (Dict.fromList). Not sure how to get around this. See line 157 for my attempt solution.
-
---unwrap : Data -> Dict. ( cant define one type to be returned here )
---unwrap obj =
---  case obj of
---    Object inner -> inner
---    Array inner -> inner
---    _ inner -> inner -- for all the Int Int, String String, Float Float etc cases.
-
----- However this won't work because each case will be returning a different type.
-
-
-
----- what I had in mind was to make a type called DeconstructedData, which would define the type for each case where the data is
----- deconstructed. However this also throws an error on compile because those types are already defined and used in another type
----- (the original Data type).
-
-----type DeconstructedData
-----  = Dict String Data
-----  | Array Data
-----  | String
-----  | Int
-----  | Float
-----  | Bool
-----  | Null
-
-
----- I then hoped to do something like
-
-----unwrapAnyType : Data -> DeconstructedData
-----unwrapAnyType data =
-----  case data of
-----    Object inner -> inner
-----    Array inner -> inner
-----    _ inner -> inner
-
----- but the DeconstructedData type wont compile as most of the union types are already defined in Data so it complains.
----- Comment out getValues and all the unwrap functions and you can see what error pops up.

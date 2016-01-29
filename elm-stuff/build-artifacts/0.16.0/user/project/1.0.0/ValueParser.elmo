@@ -102,7 +102,7 @@ Elm.ValueParser.make = function (_elm) {
    var getValues = function () {
       var parsed = A2($Json$Decode.decodeString,
       decoder({ctor: "_Tuple0"}),
-      demo);
+      moreJSON);
       var _p12 = parsed;
       if (_p12.ctor === "Ok") {
             return _p12._0;

@@ -56,7 +56,7 @@ Elm.StructureDecoder.make = function (_elm) {
    var getModel = function () {
       var _p0 = A2($Json$Decode.decodeString,
       dataModelDecoder,
-      demoJSON);
+      jsonString);
       if (_p0.ctor === "Ok") {
             return setModel(_p0._0);
          } else {
